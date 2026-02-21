@@ -1,0 +1,37 @@
+@import "tailwindcss";
+
+@theme {
+  /* Brand colors */
+  --color-primary: #1e40af;
+  --color-primary-light: #2563eb;
+  --color-primary-surface: #3b82f6;
+  --color-court-line: #ffffff;
+
+  --color-team-blue: #2563eb;
+  --color-team-blue-light: #60a5fa;
+  --color-team-red: #dc2626;
+  --color-team-red-light: #f87171;
+
+  --color-gold: #f59e0b;
+  --color-silver: #9ca3af;
+  --color-bronze: #b45309;
+
+  /* Heatmap scales */
+  --color-heat-partner-low: #eff6ff;
+  --color-heat-partner-high: #1d4ed8;
+  --color-heat-opponent-low: #fef2f2;
+  --color-heat-opponent-high: #dc2626;
+
+  /* Fairness indicator colors */
+  --color-fair-good: #16a34a;
+  --color-fair-warn: #ca8a04;
+  --color-fair-bad: #dc2626;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: system-ui, -apple-system, sans-serif;
+  background: linear-gradient(135deg, #f8fafc 0%, #eff6ff 50%, #f8fafc 100%) fixed;
+  color: #1e293b;
+}

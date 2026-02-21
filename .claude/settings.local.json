@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cd \"C:/Users/Manuel/Dev/VSCode_Projects/Claude_Projects/padel_tournament_scheduler\" && npm install 2>&1)",
+      "Bash(cd \"C:/Users/Manuel/Dev/VSCode_Projects/Claude_Projects/padel_tournament_scheduler\" && npm install -D @tailwindcss/vite tailwindcss 2>&1)",
+      "Bash(cd:*)",
+      "Bash(cd \"C:/Users/Manuel/Dev/VSCode_Projects/Claude_Projects/padel_tournament_scheduler\" && npx tsc --noEmit 2>&1)",
+      "Bash(cd \"C:/Users/Manuel/Dev/VSCode_Projects/Claude_Projects/padel_tournament_scheduler\" && npm run build 2>&1)",
+      "Bash(cd \"C:/Users/Manuel/Dev/VSCode_Projects/Claude_Projects/padel_tournament_scheduler\" && git init && git add -A && git status 2>&1)",
+      "Bash(true:*)",
+      "Bash(cd /c/Users/Manuel/Dev/VSCode_Projects/Claude_Projects/padel_tournament_scheduler && npm run build 2>&1)",
+      "Bash(cd \"C:\\\\Users\\\\Manuel\\\\Dev\\\\VSCode_Projects\\\\Claude_Projects\\\\padel_tournament_scheduler\" && npm run build 2>&1)",
+      "Bash(gh auth:*)",
+      "Bash(cd /c/Users/Manuel/Dev/VSCode_Projects/Claude_Projects/padel_tournament_scheduler && gh repo create padel-tournament-scheduler --public --description \"Padel tournament scheduler with automatic court assignment, fair partner/opponent rotation, and leaderboard tracking\" --source . --push 2>&1)",
+      "Bash(cd /c/Users/Manuel/Dev/VSCode_Projects/Claude_Projects/padel_tournament_scheduler && git add src/components/round/CourtCard.tsx src/vite-env.d.ts && git add -u && git commit -m \"$\\(cat <<'EOF'\nInitial commit: Padel tournament scheduler\n\nReact + TypeScript + Vite app for managing padel tournaments with\nautomatic court assignment, fair partner/opponent rotation, scoring,\nleaderboard tracking, and a schedule simulator with Monte Carlo mode.\n\nCo-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>\nEOF\n\\)\" 2>&1)"
+    ]
+  }
+}
