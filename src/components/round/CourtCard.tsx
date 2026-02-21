@@ -25,42 +25,38 @@ export function CourtCard({
 
   const isWinLoss = scoringConfig.mode === 'winloss'
 
-  return (
-    <div className="bg-white rounded-xl shadow border border-gray-200 transition-shadow overflow-hidden">
-      <h4 className="text-lg font-bold text-primary px-4 pt-3 pb-2">{courtLabel}</h4>
-
-      {isWinLoss ? (
-        <WinLossCourtLayout
-          team1Name1={team1Name1}
-          team1Name2={team1Name2}
-          team2Name1={team2Name1}
-          team2Name2={team2Name2}
-          winner={match.winner}
-          onSetWinner={onSetWinner}
-          onClearScore={onClearScore}
-          disabled={disabled}
-        />
-      ) : (
-        <PointsCourtLayout
-          team1Name1={team1Name1}
-          team1Name2={team1Name2}
-          team2Name1={team2Name1}
-          team2Name2={team2Name2}
-          score1={match.score1}
-          score2={match.score2}
-          max={scoringConfig.pointsPerMatch}
-          onSetScore={onSetScore}
-          onClearScore={onClearScore}
-          disabled={disabled}
-        />
-      )}
-    </div>
+  return isWinLoss ? (
+    <WinLossCourtLayout
+      team1Name1={team1Name1}
+      team1Name2={team1Name2}
+      team2Name1={team2Name1}
+      team2Name2={team2Name2}
+      courtLabel={courtLabel}
+      winner={match.winner}
+      onSetWinner={onSetWinner}
+      onClearScore={onClearScore}
+      disabled={disabled}
+    />
+  ) : (
+    <PointsCourtLayout
+      team1Name1={team1Name1}
+      team1Name2={team1Name2}
+      team2Name1={team2Name1}
+      team2Name2={team2Name2}
+      courtLabel={courtLabel}
+      score1={match.score1}
+      score2={match.score2}
+      max={scoringConfig.pointsPerMatch}
+      onSetScore={onSetScore}
+      onClearScore={onClearScore}
+      disabled={disabled}
+    />
   )
 }
 
 /* ─── Horizontal SVG Court Background ─── */
 
-function CourtBackground() {
+function CourtBackground({ courtLabel }: { courtLabel: string }) {
   return (
     <svg viewBox="0 0 300 200" className="absolute inset-0 w-full h-full" preserveAspectRatio="none">
       {/* Court surface */}
@@ -86,6 +82,11 @@ function CourtBackground() {
 
       {/* Court border */}
       <rect x="6" y="6" width="288" height="188" rx="4" fill="none" stroke="white" strokeWidth="1.5" strokeOpacity="0.5" />
+
+      {/* Court label background pill */}
+      <rect x="110" y="6" width="80" height="22" rx="4" fill="black" fillOpacity="0.25" />
+      {/* Court label */}
+      <text x="150" y="22" textAnchor="middle" fill="white" fontWeight="bold" fontSize="16" letterSpacing="0.5" style={{ pointerEvents: 'none' }}>{courtLabel}</text>
     </svg>
   )
 }
@@ -94,10 +95,11 @@ function CourtBackground() {
 
 function WinLossCourtLayout({
   team1Name1, team1Name2, team2Name1, team2Name2,
-  winner, onSetWinner, onClearScore, disabled,
+  courtLabel, winner, onSetWinner, onClearScore, disabled,
 }: {
   team1Name1: string; team1Name2: string
   team2Name1: string; team2Name2: string
+  courtLabel: string
   winner?: 1 | 2
   onSetWinner: (winner: 1 | 2) => void
   onClearScore: () => void
@@ -115,8 +117,8 @@ function WinLossCourtLayout({
   }
 
   return (
-    <div className="relative mx-3 mb-3 rounded-lg" style={{ aspectRatio: '300 / 200' }}>
-      <CourtBackground />
+    <div className="relative rounded-lg" style={{ aspectRatio: '300 / 200' }}>
+      <CourtBackground courtLabel={courtLabel} />
 
       {/* Overlay: two clickable halves */}
       <div className="absolute inset-0 flex">
@@ -125,15 +127,15 @@ function WinLossCourtLayout({
           type="button"
           onClick={() => handleClick(1)}
           disabled={disabled}
-          className={`flex-1 flex flex-col items-center justify-center gap-2 transition-colors rounded-l-lg ${
+          className={`flex-1 flex flex-col items-center justify-around transition-colors rounded-l-lg ${
             winner === 1
               ? 'bg-white/30'
               : 'hover:bg-white/10'
           } disabled:cursor-not-allowed`}
         >
           <PlayerPill name={team1Name1} color="blue" />
+          {winner === 1 && <span className="text-[11px] font-bold text-white bg-team-blue/80 px-2 py-0.5 rounded-full">{t('court.win')}</span>}
           <PlayerPill name={team1Name2} color="blue" />
-          {winner === 1 && <span className="text-[11px] font-bold text-white bg-team-blue/80 px-2 py-0.5 rounded-full mt-1">{t('court.win')}</span>}
         </button>
 
         {/* Team 2 (red) */}
@@ -141,15 +143,15 @@ function WinLossCourtLayout({
           type="button"
           onClick={() => handleClick(2)}
           disabled={disabled}
-          className={`flex-1 flex flex-col items-center justify-center gap-2 transition-colors rounded-r-lg ${
+          className={`flex-1 flex flex-col items-center justify-around transition-colors rounded-r-lg ${
             winner === 2
               ? 'bg-white/30'
               : 'hover:bg-white/10'
           } disabled:cursor-not-allowed`}
         >
           <PlayerPill name={team2Name1} color="red" />
+          {winner === 2 && <span className="text-[11px] font-bold text-white bg-team-red/80 px-2 py-0.5 rounded-full">{t('court.win')}</span>}
           <PlayerPill name={team2Name2} color="red" />
-          {winner === 2 && <span className="text-[11px] font-bold text-white bg-team-red/80 px-2 py-0.5 rounded-full mt-1">{t('court.win')}</span>}
         </button>
       </div>
     </div>
@@ -160,18 +162,18 @@ function WinLossCourtLayout({
 
 function PointsCourtLayout({
   team1Name1, team1Name2, team2Name1, team2Name2,
-  score1, score2, max,
+  courtLabel, score1, score2, max,
   onSetScore, onClearScore, disabled,
 }: {
   team1Name1: string; team1Name2: string
   team2Name1: string; team2Name2: string
+  courtLabel: string
   score1?: number; score2?: number
   max: number
   onSetScore: (score1: number, score2: number) => void
   onClearScore: () => void
   disabled?: boolean
 }) {
-  const { t } = useT()
   const [text1, setText1] = useState(score1 != null ? String(score1) : '')
   const [text2, setText2] = useState(score2 != null ? String(score2) : '')
 
@@ -209,50 +211,46 @@ function PointsCourtLayout({
   }
 
   return (
-    <>
-      <div className="relative mx-3 mb-2 rounded-lg" style={{ aspectRatio: '300 / 200' }}>
-        <CourtBackground />
+    <div className="relative rounded-lg" style={{ aspectRatio: '300 / 200' }}>
+      <CourtBackground courtLabel={courtLabel} />
 
-        {/* Overlay: players + score */}
-        <div className="absolute inset-0 flex items-center">
-          {/* Team 1 (left): names left, score right near net */}
-          <div className="flex-1 flex items-center justify-center gap-2">
-            <div className="flex flex-col items-center gap-1.5">
-              <PlayerPill name={team1Name1} color="blue" />
-              <PlayerPill name={team1Name2} color="blue" />
-            </div>
-            <ScoreInput
-              value={text1}
-              max={max}
-              color="blue"
-              disabled={disabled}
-              onChange={handleChange1}
-              onSelect={s1 => { onSetScore(s1, max - s1) }}
-              onClear={onClearScore}
-            />
+      {/* Overlay: players + score */}
+      <div className="absolute inset-0 flex">
+        {/* Team 1 (left): names spread vertically, score centered near net */}
+        <div className="flex-1 flex items-center justify-center gap-2">
+          <div className="flex flex-col items-center justify-around h-full">
+            <PlayerPill name={team1Name1} color="blue" />
+            <PlayerPill name={team1Name2} color="blue" />
           </div>
+          <ScoreInput
+            value={text1}
+            max={max}
+            color="blue"
+            disabled={disabled}
+            onChange={handleChange1}
+            onSelect={s1 => { onSetScore(s1, max - s1) }}
+            onClear={onClearScore}
+          />
+        </div>
 
-          {/* Team 2 (right): score left near net, names right */}
-          <div className="flex-1 flex items-center justify-center gap-2">
-            <ScoreInput
-              value={text2}
-              max={max}
-              color="red"
-              disabled={disabled}
-              onChange={handleChange2}
-              onSelect={s2 => { onSetScore(max - s2, s2) }}
-              onClear={onClearScore}
-            />
-            <div className="flex flex-col items-center gap-1.5">
-              <PlayerPill name={team2Name1} color="red" />
-              <PlayerPill name={team2Name2} color="red" />
-            </div>
+        {/* Team 2 (right): score centered near net, names spread vertically */}
+        <div className="flex-1 flex items-center justify-center gap-2">
+          <ScoreInput
+            value={text2}
+            max={max}
+            color="red"
+            disabled={disabled}
+            onChange={handleChange2}
+            onSelect={s2 => { onSetScore(max - s2, s2) }}
+            onClear={onClearScore}
+          />
+          <div className="flex flex-col items-center justify-around h-full">
+            <PlayerPill name={team2Name1} color="red" />
+            <PlayerPill name={team2Name2} color="red" />
           </div>
         </div>
       </div>
-
-      <p className="text-[10px] text-gray-400 text-center pb-2">{t('court.total', { n: max })}</p>
-    </>
+    </div>
   )
 }
 
@@ -312,7 +310,7 @@ function ScoreInput({ value, max, color, disabled, onChange, onSelect, onClear }
         onFocus={() => !disabled && setOpen(true)}
         disabled={disabled}
         placeholder="–"
-        className={`w-10 h-8 border-2 border-white/60 rounded text-center text-sm font-bold focus:outline-none focus:ring-2 focus:ring-white disabled:opacity-50 bg-white/90 cursor-pointer ${textColor}`}
+        className={`w-10 h-8 border-2 border-white/60 rounded text-center text-sm font-bold focus:outline-none focus:ring-2 focus:ring-white disabled:opacity-50 bg-white/90 cursor-pointer hover:bg-white hover:border-white/80 hover:shadow-md ${textColor}`}
       />
       {open && !disabled && createPortal(
         <div
@@ -368,7 +366,7 @@ function PlayerPill({ name, color }: { name: string; color: 'blue' | 'red' }) {
     : 'border-team-red text-team-red'
 
   return (
-    <span className={`inline-block max-w-[90%] px-3 py-1 bg-white rounded-full border-2 text-sm font-semibold truncate shadow ${colors}`}>
+    <span className={`inline-block px-3 py-1 bg-white rounded-full border-2 text-sm font-semibold shadow ${colors}`}>
       {name}
     </span>
   )

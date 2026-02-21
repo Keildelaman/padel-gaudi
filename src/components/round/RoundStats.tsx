@@ -11,7 +11,6 @@ export function RoundStats({ tournament }: RoundStatsProps) {
   const { t } = useT()
   const [open, setOpen] = useState(false)
   const leaderboard = getLeaderboard(tournament)
-  const top5 = leaderboard.slice(0, 5)
 
   return (
     <div className="border border-gray-200 rounded-lg overflow-hidden">
@@ -34,7 +33,7 @@ export function RoundStats({ tournament }: RoundStatsProps) {
               </tr>
             </thead>
             <tbody>
-              {top5.map(entry => (
+              {leaderboard.map(entry => (
                 <tr key={entry.playerId} className="border-t border-gray-100">
                   <td className="py-1 text-gray-500">{entry.rank}</td>
                   <td className="py-1 font-medium">{entry.playerName}</td>

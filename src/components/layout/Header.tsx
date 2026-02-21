@@ -29,6 +29,7 @@ export function Header() {
             <nav className="flex gap-1">
               {navItems.map(item => {
                 if (item.requiresTournament && !hasTournament) return null
+                if (item.page === 'leaderboard' && state.tournament?.phase !== 'finished') return null
                 const isActive = state.currentPage === item.page
                 return (
                   <button
