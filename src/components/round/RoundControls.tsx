@@ -1,4 +1,5 @@
 import { Button } from '../shared'
+import { useT } from '../../i18n'
 
 interface RoundControlsProps {
   roundNumber: number
@@ -16,6 +17,9 @@ export function RoundControls({
   roundNumber, totalRounds, isComplete, isConfirmed, isLastRound, openEnded,
   onPrev, onNext, onFinish,
 }: RoundControlsProps) {
+  const { t } = useT()
+  const totalPart = openEnded ? '' : t('roundControls.roundOf', { n: totalRounds })
+
   return (
     <div className="flex items-center justify-between gap-3">
       <Button
@@ -23,11 +27,11 @@ export function RoundControls({
         onClick={onPrev}
         disabled={roundNumber <= 1}
       >
-        Previous
+        {t('roundControls.previous')}
       </Button>
 
       <span className="text-sm text-gray-500 font-medium">
-        Round {roundNumber}{openEnded ? '' : ` / ${totalRounds}`}
+        {t('roundControls.round', { current: roundNumber, total: totalPart })}
       </span>
 
       <div className="flex gap-2">
@@ -37,12 +41,12 @@ export function RoundControls({
             onClick={onNext}
             disabled={!isComplete && !isConfirmed}
           >
-            Next
+            {t('roundControls.next')}
           </Button>
         )}
         {(isLastRound || (openEnded && isComplete)) && (
           <Button variant="primary" onClick={onFinish}>
-            Finish Tournament
+            {t('roundControls.finishTournament')}
           </Button>
         )}
       </div>

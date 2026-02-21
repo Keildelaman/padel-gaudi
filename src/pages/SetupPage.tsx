@@ -12,6 +12,7 @@ import { validatePlayerNames, suggestRoundCount, effectiveCourts } from '../util
 import { generateScheduleMonteCarlo, computeFairnessMetrics } from '../algorithm'
 import { buildMatrices } from '../algorithm/metrics'
 import { generateId } from '../utils/ids'
+import { useT } from '../i18n'
 import type { ScoringMode, Player, Round, GeneratedSchedule, FairnessMetrics } from '../types'
 
 function ensureTrailingEmpty(names: string[]): string[] {
@@ -33,6 +34,7 @@ interface SchedulePreviewData {
 
 export function SetupPage() {
   const { state, dispatch } = useTournament()
+  const { t } = useT()
 
   const draft = state.setupDraft
   const [name, setName] = useState(draft?.name ?? DEFAULT_TOURNAMENT_NAME)
@@ -119,9 +121,9 @@ export function SetupPage() {
 
   const handleStart = () => {
     const names = playerNames.map(n => n.trim()).filter(n => n.length > 0)
-    const nameError = validatePlayerNames(names)
+    const nameError = validatePlayerNames(names, t)
     if (nameError) { setError(nameError); return }
-    if (eCourts < 1) { setError('Not enough players for even 1 court'); return }
+    if (eCourts < 1) { setError(t('setup.notEnoughPlayers')); return }
     setError(null)
 
     const players: Player[] = names.map(n => ({ id: generateId(), name: n }))
@@ -149,26 +151,27 @@ export function SetupPage() {
         scoringConfig: { mode: scoringMode, pointsPerMatch },
         rounds: preview.rounds,
         openEnded,
-        courtNames: hasCustomNames ? finalCourtNames.map((n, i) => n.trim() || `Court ${i + 1}`) : undefined,
+        courtNames: hasCustomNames ? finalCourtNames.map((n, i) => n.trim() || t('setup.courtPlaceholder', { n: i + 1 })) : undefined,
       },
     })
   }
 
   // If tournament is active, show a resume/new option
   if (state.tournament && state.tournament.phase !== 'finished') {
+    const totalPart = state.tournament.openEnded ? '' : t('setup.inProgressOf', { n: state.tournament.totalRounds })
     return (
       <div className="max-w-3xl mx-auto space-y-4">
         <Card>
-          <h2 className="text-xl font-bold mb-2">Tournament in Progress</h2>
+          <h2 className="text-xl font-bold mb-2">{t('setup.inProgress')}</h2>
           <p className="text-gray-600 mb-4">
-            "{state.tournament.name}" is active (Round {state.tournament.currentRound}{state.tournament.openEnded ? '' : ` of ${state.tournament.totalRounds}`}).
+            {t('setup.inProgressDesc', { name: state.tournament.name, current: state.tournament.currentRound, total: totalPart })}
           </p>
           <div className="flex gap-3">
             <Button onClick={() => dispatch({ type: 'NAVIGATE_PAGE', payload: { page: 'round' } })}>
-              Resume
+              {t('setup.resume')}
             </Button>
             <Button variant="destructive" onClick={() => dispatch({ type: 'RESET_TOURNAMENT' })}>
-              Start New
+              {t('setup.startNew')}
             </Button>
           </div>
         </Card>
@@ -180,7 +183,7 @@ export function SetupPage() {
   if (preview) {
     return (
       <div className="max-w-5xl mx-auto space-y-6">
-        <h2 className="text-2xl font-bold border-l-4 border-primary pl-3">Schedule Preview</h2>
+        <h2 className="text-2xl font-bold border-l-4 border-primary pl-3">{t('preview.title')}</h2>
 
         <FairnessCards metrics={preview.metrics} />
 
@@ -191,7 +194,7 @@ export function SetupPage() {
               labels={preview.playerLabels}
               colorLow="#eff6ff"
               colorHigh="#1d4ed8"
-              title="Partner Frequency"
+              title={t('preview.partnerFrequency')}
             />
           </Card>
           <Card>
@@ -200,21 +203,21 @@ export function SetupPage() {
               labels={preview.playerLabels}
               colorLow="#fef2f2"
               colorHigh="#dc2626"
-              title="Opponent Frequency"
+              title={t('preview.opponentFrequency')}
             />
           </Card>
         </div>
 
         <div className="flex justify-between gap-3">
           <Button variant="secondary" onClick={() => setPreview(null)}>
-            Back
+            {t('preview.back')}
           </Button>
           <div className="flex gap-3">
             <Button variant="secondary" onClick={handleRegenerate}>
-              Regenerate
+              {t('preview.regenerate')}
             </Button>
             <Button onClick={handleConfirmStart}>
-              Confirm &amp; Start
+              {t('preview.confirmStart')}
             </Button>
           </div>
         </div>
@@ -224,11 +227,11 @@ export function SetupPage() {
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">
-      <h2 className="text-2xl font-bold border-l-4 border-primary pl-3">New Tournament</h2>
+      <h2 className="text-2xl font-bold border-l-4 border-primary pl-3">{t('setup.title')}</h2>
 
       {/* Tournament Name */}
       <Card>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Tournament Name</label>
+        <label className="block text-sm font-medium text-gray-700 mb-1">{t('setup.tournamentName')}</label>
         <input
           type="text"
           value={name}
@@ -240,7 +243,7 @@ export function SetupPage() {
 
       {/* Scoring Mode */}
       <Card>
-        <label className="block text-sm font-medium text-gray-700 mb-2">Scoring Mode</label>
+        <label className="block text-sm font-medium text-gray-700 mb-2">{t('setup.scoringMode')}</label>
         <div className="flex gap-2">
           <button
             onClick={() => setScoringMode('points')}
@@ -250,7 +253,7 @@ export function SetupPage() {
                 : 'border-gray-300 text-gray-600 hover:bg-gray-50'
             }`}
           >
-            Points to N
+            {t('setup.scoringPoints')}
           </button>
           <button
             onClick={() => setScoringMode('winloss')}
@@ -260,19 +263,19 @@ export function SetupPage() {
                 : 'border-gray-300 text-gray-600 hover:bg-gray-50'
             }`}
           >
-            Win / Loss
+            {t('setup.scoringWinLoss')}
           </button>
         </div>
         {scoringMode === 'points' && (
           <div className="mt-3">
             <NumberInput
-              label="Points per match"
+              label={t('setup.pointsPerMatch')}
               value={pointsPerMatch}
               onChange={setPointsPerMatch}
               min={4}
               max={100}
             />
-            <p className="text-xs text-gray-500 mt-1">Total points split between teams (e.g. 20-12)</p>
+            <p className="text-xs text-gray-500 mt-1">{t('setup.pointsPerMatchHint')}</p>
           </div>
         )}
       </Card>
@@ -282,7 +285,7 @@ export function SetupPage() {
         {/* Players */}
         <Card>
           <label className="text-sm font-medium text-gray-700 mb-3 block">
-            Players ({validNames.length})
+            {t('setup.players', { count: validNames.length })}
           </label>
           <div className="space-y-2">
             {playerNames.map((pName, i) => {
@@ -295,7 +298,7 @@ export function SetupPage() {
                     value={pName}
                     onChange={e => updatePlayer(i, e.target.value)}
                     onKeyDown={e => handlePlayerKeyDown(i, e)}
-                    placeholder={isAutoGrowSlot ? 'Add player...' : `Player ${i + 1}`}
+                    placeholder={isAutoGrowSlot ? t('setup.addPlayer') : t('setup.playerPlaceholder', { n: i + 1 })}
                     className={`flex-1 px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary ${
                       isAutoGrowSlot ? 'border-dashed border-gray-300' : 'border-gray-300'
                     }`}
@@ -318,7 +321,7 @@ export function SetupPage() {
         <div className="space-y-6">
           <Card>
             {/* Round mode toggle */}
-            <label className="block text-sm font-medium text-gray-700 mb-2">Round Mode</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">{t('setup.roundMode')}</label>
             <div className="flex gap-2 mb-4">
               <button
                 onClick={() => setOpenEnded(false)}
@@ -328,7 +331,7 @@ export function SetupPage() {
                     : 'border-gray-300 text-gray-600 hover:bg-gray-50'
                 }`}
               >
-                Fixed rounds
+                {t('setup.fixedRounds')}
               </button>
               <button
                 onClick={() => setOpenEnded(true)}
@@ -338,13 +341,13 @@ export function SetupPage() {
                     : 'border-gray-300 text-gray-600 hover:bg-gray-50'
                 }`}
               >
-                Open-ended
+                {t('setup.openEnded')}
               </button>
             </div>
 
             <div className={openEnded ? '' : 'grid grid-cols-2 gap-6'}>
               <NumberInput
-                label="Courts"
+                label={t('setup.courts')}
                 value={courts}
                 onChange={setCourts}
                 min={MIN_COURTS}
@@ -352,7 +355,7 @@ export function SetupPage() {
               />
               {!openEnded && (
                 <NumberInput
-                  label="Rounds"
+                  label={t('setup.rounds')}
                   value={rounds}
                   onChange={setRounds}
                   min={MIN_ROUNDS}
@@ -361,32 +364,32 @@ export function SetupPage() {
               )}
             </div>
             <div className="mt-2 text-xs text-gray-500 space-y-1">
-              <p>{eCourts} court(s) active, {eCourts * PLAYERS_PER_COURT} players per round, {Math.max(0, validNames.length - eCourts * PLAYERS_PER_COURT)} sitting out</p>
+              <p>{t('setup.courtInfo', { courts: eCourts, playing: eCourts * PLAYERS_PER_COURT, sitting: Math.max(0, validNames.length - eCourts * PLAYERS_PER_COURT) })}</p>
               {!openEnded && validNames.length >= MIN_PLAYERS && (
                 <div className="flex items-center gap-1">
                   <button
                     className="text-primary hover:underline"
                     onClick={() => setRounds(suggested)}
                   >
-                    Suggested: {suggested} rounds
+                    {t('setup.suggested', { n: suggested })}
                   </button>
                   <div className="relative group">
                     <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-gray-200 text-gray-500 text-[10px] font-bold cursor-help">?</span>
                     <div className="invisible group-hover:visible absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-56 px-3 py-2 bg-gray-800 text-white text-xs rounded-lg shadow-lg z-10">
-                      Minimum rounds for every player to partner with every other player at least once. Formula: N&times;(N-1) / (2&times;players per round)
+                      {t('setup.suggestedTooltip')}
                       <div className="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-x-4 border-x-transparent border-t-4 border-t-gray-800" />
                     </div>
                   </div>
                 </div>
               )}
               {openEnded && (
-                <p className="text-gray-400 italic">Play as many rounds as you like. Finish the tournament at any time.</p>
+                <p className="text-gray-400 italic">{t('setup.openEndedHint')}</p>
               )}
             </div>
 
             {eCourts > 0 && (
               <div className="mt-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">Court Names <span className="text-gray-400 font-normal">(optional)</span></label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t('setup.courtNames')} <span className="text-gray-400 font-normal">{t('setup.courtNamesOptional')}</span></label>
                 <div className="space-y-2">
                   {Array.from({ length: eCourts }, (_, i) => (
                     <input
@@ -399,7 +402,7 @@ export function SetupPage() {
                         updated[i] = e.target.value
                         setCourtNames(updated)
                       }}
-                      placeholder={`Court ${i + 1}`}
+                      placeholder={t('setup.courtPlaceholder', { n: i + 1 })}
                       className="w-full px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary"
                     />
                   ))}
@@ -415,7 +418,7 @@ export function SetupPage() {
       )}
 
       <Button fullWidth onClick={handleStart} disabled={validNames.length < MIN_PLAYERS}>
-        Start Tournament
+        {t('setup.startTournament')}
       </Button>
     </div>
   )

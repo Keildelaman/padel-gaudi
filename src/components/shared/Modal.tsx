@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { useEffect } from 'react'
 import { Button } from './Button'
+import { useT } from '../../i18n'
 
 interface ModalProps {
   open: boolean
@@ -13,6 +14,8 @@ interface ModalProps {
 }
 
 export function Modal({ open, onClose, title, children, confirmText, confirmVariant = 'primary', onConfirm }: ModalProps) {
+  const { t } = useT()
+
   useEffect(() => {
     if (open) {
       document.body.style.overflow = 'hidden'
@@ -29,10 +32,10 @@ export function Modal({ open, onClose, title, children, confirmText, confirmVari
         <h3 className="text-lg font-semibold mb-3">{title}</h3>
         <div className="mb-6 text-gray-600">{children}</div>
         <div className="flex justify-end gap-3">
-          <Button variant="secondary" onClick={onClose}>Cancel</Button>
+          <Button variant="secondary" onClick={onClose}>{t('modal.cancel')}</Button>
           {onConfirm && (
             <Button variant={confirmVariant} onClick={onConfirm}>
-              {confirmText ?? 'Confirm'}
+              {confirmText ?? t('modal.confirm')}
             </Button>
           )}
         </div>

@@ -7,9 +7,11 @@ import { generateSchedule, generateScheduleMonteCarlo, computeFairnessMetrics } 
 import { buildMatrices } from '../algorithm/metrics'
 import { MIN_PLAYERS, MAX_PLAYERS, MIN_COURTS, MAX_COURTS, MIN_ROUNDS, MAX_ROUNDS, MONTE_CARLO_DEFAULT_ITERATIONS } from '../constants'
 import { effectiveCourts } from '../utils/validation'
+import { useT } from '../i18n'
 import type { SimulatorResult, GeneratedSchedule } from '../types'
 
 export function SimulatorPage() {
+  const { t } = useT()
   const [playerCount, setPlayerCount] = useState(8)
   const [courts, setCourts] = useState(2)
   const [rounds, setRounds] = useState(10)
@@ -45,16 +47,16 @@ export function SimulatorPage() {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold border-l-4 border-primary pl-3">Algorithm Simulator</h2>
+      <h2 className="text-2xl font-bold border-l-4 border-primary pl-3">{t('simulator.title')}</h2>
 
       {/* Config Panel */}
       <Card>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          <NumberInput label="Players" value={playerCount} onChange={setPlayerCount} min={MIN_PLAYERS} max={MAX_PLAYERS} />
-          <NumberInput label="Courts" value={courts} onChange={setCourts} min={MIN_COURTS} max={MAX_COURTS} />
-          <NumberInput label="Rounds" value={rounds} onChange={setRounds} min={MIN_ROUNDS} max={MAX_ROUNDS} />
+          <NumberInput label={t('simulator.players')} value={playerCount} onChange={setPlayerCount} min={MIN_PLAYERS} max={MAX_PLAYERS} />
+          <NumberInput label={t('simulator.courts')} value={courts} onChange={setCourts} min={MIN_COURTS} max={MAX_COURTS} />
+          <NumberInput label={t('simulator.rounds')} value={rounds} onChange={setRounds} min={MIN_ROUNDS} max={MAX_ROUNDS} />
           {mode === 'montecarlo' && (
-            <NumberInput label="Iterations" value={iterations} onChange={setIterations} min={10} max={1000} />
+            <NumberInput label={t('simulator.iterations')} value={iterations} onChange={setIterations} min={10} max={1000} />
           )}
         </div>
         <div className="flex items-center gap-4 mt-4">
@@ -66,10 +68,10 @@ export function SimulatorPage() {
                   mode === 'greedy' ? 'border-primary bg-primary/10 text-primary' : 'border-gray-300 text-gray-600'
                 }`}
               >
-                Greedy
+                {t('simulator.greedy')}
               </button>
               <div className="invisible group-hover:visible absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-64 px-3 py-2 bg-gray-800 text-white text-xs rounded-lg shadow-lg z-10 font-normal">
-                Builds the schedule round-by-round, always picking the fairest option. Fast and consistent — this is the same algorithm used when starting a real tournament.
+                {t('simulator.greedyTooltip')}
                 <div className="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-x-4 border-x-transparent border-t-4 border-t-gray-800" />
               </div>
             </div>
@@ -80,20 +82,20 @@ export function SimulatorPage() {
                   mode === 'montecarlo' ? 'border-primary bg-primary/10 text-primary' : 'border-gray-300 text-gray-600'
                 }`}
               >
-                Monte Carlo
+                {t('simulator.monteCarlo')}
               </button>
               <div className="invisible group-hover:visible absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-64 px-3 py-2 bg-gray-800 text-white text-xs rounded-lg shadow-lg z-10 font-normal">
-                Runs the algorithm many times with shuffled player orders and keeps the best result. Slower but may find better solutions.
+                {t('simulator.monteCarloTooltip')}
                 <div className="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-x-4 border-x-transparent border-t-4 border-t-gray-800" />
               </div>
             </div>
           </div>
           <Button onClick={runSimulation} disabled={running}>
-            {running ? 'Running...' : 'Run Simulation'}
+            {running ? t('simulator.running') : t('simulator.runSimulation')}
           </Button>
         </div>
         <p className="text-xs text-gray-500 mt-2">
-          {eCourts} effective court(s), {eCourts * 4} players per round, {Math.max(0, playerCount - eCourts * 4)} pausing
+          {t('simulator.courtInfo', { courts: eCourts, playing: eCourts * 4, sitting: Math.max(0, playerCount - eCourts * 4) })}
         </p>
       </Card>
 
@@ -110,7 +112,7 @@ export function SimulatorPage() {
                 labels={result.playerLabels}
                 colorLow="#eff6ff"
                 colorHigh="#1d4ed8"
-                title="Partner Frequency"
+                title={t('simulator.partnerFrequency')}
               />
             </Card>
             <Card>
@@ -119,7 +121,7 @@ export function SimulatorPage() {
                 labels={result.playerLabels}
                 colorLow="#fef2f2"
                 colorHigh="#dc2626"
-                title="Opponent Frequency"
+                title={t('simulator.opponentFrequency')}
               />
             </Card>
           </div>

@@ -3,20 +3,22 @@ import { Card, Button } from '../components/shared'
 import { PodiumGraphic } from '../components/leaderboard/PodiumGraphic'
 import { LeaderboardTable } from '../components/leaderboard/LeaderboardTable'
 import { leaderboardToCsv, leaderboardToText, downloadFile } from '../utils/export'
+import { useT } from '../i18n'
 
 export function LeaderboardPage() {
   const { state, dispatch } = useTournament()
+  const { t } = useT()
   const tournament = state.tournament
 
   if (!tournament) {
     return (
       <div className="text-center py-12 text-gray-500">
-        <p>No tournament data available.</p>
+        <p>{t('leaderboard.noData')}</p>
         <button
           className="mt-3 text-primary hover:underline"
           onClick={() => dispatch({ type: 'NAVIGATE_PAGE', payload: { page: 'setup' } })}
         >
-          Go to Setup
+          {t('leaderboard.goToSetup')}
         </button>
       </div>
     )
@@ -30,25 +32,25 @@ export function LeaderboardPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold border-l-4 border-primary pl-3">
-          {tournament.phase === 'finished' ? 'Final Results' : 'Current Standings'}
+          {tournament.phase === 'finished' ? t('leaderboard.finalResults') : t('leaderboard.currentStandings')}
         </h2>
         <div className="flex gap-2">
           <Button
             variant="secondary"
             className="text-xs !px-3 !py-1.5"
-            onClick={() => downloadFile(leaderboardToCsv(leaderboard), `${tournament.name}-results.csv`, 'text/csv')}
+            onClick={() => downloadFile(leaderboardToCsv(leaderboard, t), `${tournament.name}-results.csv`, 'text/csv')}
           >
-            Export CSV
+            {t('leaderboard.exportCsv')}
           </Button>
           <Button
             variant="secondary"
             className="text-xs !px-3 !py-1.5"
             onClick={() => {
-              const text = leaderboardToText(leaderboard)
+              const text = leaderboardToText(leaderboard, t)
               navigator.clipboard.writeText(text)
             }}
           >
-            Copy Text
+            {t('leaderboard.copyText')}
           </Button>
         </div>
       </div>
@@ -58,21 +60,21 @@ export function LeaderboardPage() {
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
           <div>
             <div className="text-2xl font-bold text-primary">{tournament.players.length}</div>
-            <div className="text-xs text-gray-500">Players</div>
+            <div className="text-xs text-gray-500">{t('leaderboard.players')}</div>
           </div>
           <div>
             <div className="text-2xl font-bold text-primary">{completedRounds}</div>
-            <div className="text-xs text-gray-500">Rounds Played</div>
+            <div className="text-xs text-gray-500">{t('leaderboard.roundsPlayed')}</div>
           </div>
           <div>
             <div className="text-2xl font-bold text-primary">{tournament.courts}</div>
-            <div className="text-xs text-gray-500">Courts</div>
+            <div className="text-xs text-gray-500">{t('leaderboard.courts')}</div>
           </div>
           <div>
             <div className="text-2xl font-bold text-primary">
-              {tournament.scoringConfig.mode === 'points' ? `${tournament.scoringConfig.pointsPerMatch}pts` : 'W/L'}
+              {tournament.scoringConfig.mode === 'points' ? t('leaderboard.pts', { n: tournament.scoringConfig.pointsPerMatch }) : t('leaderboard.wl')}
             </div>
-            <div className="text-xs text-gray-500">Scoring</div>
+            <div className="text-xs text-gray-500">{t('leaderboard.scoring')}</div>
           </div>
         </div>
       </Card>
@@ -93,7 +95,7 @@ export function LeaderboardPage() {
       {tournament.phase === 'finished' && (
         <div className="flex justify-center">
           <Button variant="destructive" onClick={() => dispatch({ type: 'RESET_TOURNAMENT' })}>
-            New Tournament
+            {t('leaderboard.newTournament')}
           </Button>
         </div>
       )}

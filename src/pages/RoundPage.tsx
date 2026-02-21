@@ -7,10 +7,12 @@ import { RoundControls } from '../components/round/RoundControls'
 import { RoundStats } from '../components/round/RoundStats'
 import { generateAdditionalRounds } from '../algorithm'
 import { OPEN_ENDED_EXTEND_THRESHOLD, OPEN_ENDED_BATCH_SIZE } from '../constants'
+import { useT } from '../i18n'
 import type { Round } from '../types'
 
 export function RoundPage() {
   const { state, dispatch } = useTournament()
+  const { t } = useT()
   const [showFinishModal, setShowFinishModal] = useState(false)
   const tournament = state.tournament
 
@@ -55,12 +57,12 @@ export function RoundPage() {
   if (!tournament) {
     return (
       <div className="text-center py-12 text-gray-500">
-        <p>No tournament in progress.</p>
+        <p>{t('round.noTournament')}</p>
         <button
           className="mt-3 text-primary hover:underline"
           onClick={() => dispatch({ type: 'NAVIGATE_PAGE', payload: { page: 'setup' } })}
         >
-          Go to Setup
+          {t('round.goToSetup')}
         </button>
       </div>
     )
@@ -116,7 +118,7 @@ export function RoundPage() {
     <div className="space-y-6">
       {tournament.openEnded ? (
         <div className="text-sm text-gray-500 font-medium">
-          {completedRounds} round{completedRounds !== 1 ? 's' : ''} completed
+          {t('round.roundsCompleted', { n: completedRounds })}
         </div>
       ) : (
         <ProgressBar current={completedRounds} total={tournament.totalRounds} />
@@ -134,7 +136,7 @@ export function RoundPage() {
             match={match}
             scoringConfig={tournament.scoringConfig}
             playerNames={playerNames}
-            courtLabel={tournament.courtNames?.[match.courtIndex] || `Court ${match.courtIndex + 1}`}
+            courtLabel={tournament.courtNames?.[match.courtIndex] || t('round.court', { n: match.courtIndex + 1 })}
             onSetScore={(s1, s2) => handleSetScore(match.courtIndex, s1, s2)}
             onSetWinner={(w) => handleSetWinner(match.courtIndex, w)}
             onClearScore={() => handleClearScore(match.courtIndex)}
@@ -163,11 +165,11 @@ export function RoundPage() {
       <Modal
         open={showFinishModal}
         onClose={() => setShowFinishModal(false)}
-        title="Finish Tournament?"
-        confirmText="Finish"
+        title={t('round.finishTitle')}
+        confirmText={t('round.finishConfirm')}
         onConfirm={handleFinish}
       >
-        <p>This will end the tournament and show final results. Are you sure?</p>
+        <p>{t('round.finishMessage')}</p>
       </Modal>
     </div>
   )

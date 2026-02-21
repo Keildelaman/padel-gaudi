@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import type { LeaderboardEntry, Tournament } from '../../types'
 import { Badge } from '../shared'
+import { useT } from '../../i18n'
 
 interface LeaderboardTableProps {
   entries: LeaderboardEntry[]
@@ -8,13 +9,14 @@ interface LeaderboardTableProps {
 }
 
 export function LeaderboardTable({ entries, tournament }: LeaderboardTableProps) {
+  const { t } = useT()
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const playerMap = new Map(tournament.players.map(p => [p.id, p.name]))
 
   const rankBadge = (rank: number) => {
-    if (rank === 1) return <Badge color="gold">1st</Badge>
-    if (rank === 2) return <Badge color="silver">2nd</Badge>
-    if (rank === 3) return <Badge color="bronze">3rd</Badge>
+    if (rank === 1) return <Badge color="gold">{t('table.1st')}</Badge>
+    if (rank === 2) return <Badge color="silver">{t('table.2nd')}</Badge>
+    if (rank === 3) return <Badge color="bronze">{t('table.3rd')}</Badge>
     return <span className="text-gray-500 text-sm">{rank}</span>
   }
 
@@ -23,14 +25,14 @@ export function LeaderboardTable({ entries, tournament }: LeaderboardTableProps)
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b border-gray-200 text-gray-500 text-xs uppercase tracking-wide">
-            <th className="text-left py-3 px-2">Rank</th>
-            <th className="text-left py-3 px-2">Player</th>
-            <th className="text-right py-3 px-2">Points</th>
-            <th className="text-right py-3 px-2">W</th>
-            <th className="text-right py-3 px-2">L</th>
-            <th className="text-right py-3 px-2 hidden sm:table-cell">Played</th>
-            <th className="text-right py-3 px-2 hidden sm:table-cell">Paused</th>
-            <th className="text-right py-3 px-2 hidden md:table-cell">+/-</th>
+            <th className="text-left py-3 px-2">{t('table.rank')}</th>
+            <th className="text-left py-3 px-2">{t('table.player')}</th>
+            <th className="text-right py-3 px-2">{t('table.points')}</th>
+            <th className="text-right py-3 px-2">{t('table.wins')}</th>
+            <th className="text-right py-3 px-2">{t('table.losses')}</th>
+            <th className="text-right py-3 px-2 hidden sm:table-cell">{t('table.played')}</th>
+            <th className="text-right py-3 px-2 hidden sm:table-cell">{t('table.paused')}</th>
+            <th className="text-right py-3 px-2 hidden md:table-cell">{t('table.diff')}</th>
           </tr>
         </thead>
         <tbody>
@@ -62,14 +64,14 @@ export function LeaderboardTable({ entries, tournament }: LeaderboardTableProps)
                         <div key={rr.roundNumber} className="flex items-center gap-2">
                           <span className="text-gray-400 w-12">R{rr.roundNumber}:</span>
                           {rr.paused ? (
-                            <Badge color="yellow">Paused</Badge>
+                            <Badge color="yellow">{t('table.paused_badge')}</Badge>
                           ) : (
                             <>
-                              <span>w/ {playerMap.get(rr.partnerId!) ?? '?'}</span>
-                              <span className="text-gray-400">vs</span>
+                              <span>{t('table.with')} {playerMap.get(rr.partnerId!) ?? '?'}</span>
+                              <span className="text-gray-400">{t('table.vs')}</span>
                               <span>{rr.opponentIds?.map(id => playerMap.get(id) ?? '?').join(' & ')}</span>
                               {rr.won != null && (
-                                <Badge color={rr.won ? 'green' : 'red'}>{rr.won ? 'W' : 'L'}</Badge>
+                                <Badge color={rr.won ? 'green' : 'red'}>{rr.won ? t('table.wins') : t('table.losses')}</Badge>
                               )}
                               {rr.pointsScored != null && (
                                 <span className="text-gray-500 tabular-nums">{rr.pointsScored}-{rr.pointsConceded}</span>

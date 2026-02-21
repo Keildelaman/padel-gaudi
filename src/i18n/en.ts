@@ -1,0 +1,187 @@
+import type { TranslationMap } from './I18nContext'
+
+export const en: TranslationMap = {
+  // Navigation
+  'nav.setup': 'Setup',
+  'nav.rounds': 'Rounds',
+  'nav.leaderboard': 'Leaderboard',
+  'nav.simulator': 'Simulator',
+  'nav.fallbackTitle': 'OidaPadel',
+
+  // Setup page
+  'setup.title': 'New Tournament',
+  'setup.tournamentName': 'Tournament Name',
+  'setup.scoringMode': 'Scoring Mode',
+  'setup.scoringPoints': 'Points to N',
+  'setup.scoringWinLoss': 'Win / Loss',
+  'setup.pointsPerMatch': 'Points per match',
+  'setup.pointsPerMatchHint': 'Total points split between teams (e.g. 20-12)',
+  'setup.players': 'Players ({count})',
+  'setup.addPlayer': 'Add player...',
+  'setup.playerPlaceholder': 'Player {n}',
+  'setup.roundMode': 'Round Mode',
+  'setup.fixedRounds': 'Fixed rounds',
+  'setup.openEnded': 'Open-ended',
+  'setup.courts': 'Courts',
+  'setup.rounds': 'Rounds',
+  'setup.courtInfo': '{courts} court(s) active, {playing} players per round, {sitting} sitting out',
+  'setup.suggested': 'Suggested: {n} rounds',
+  'setup.suggestedTooltip': 'Minimum rounds for every player to partner with every other player at least once. Formula: N*(N-1) / (2*players per round)',
+  'setup.openEndedHint': 'Play as many rounds as you like. Finish the tournament at any time.',
+  'setup.courtNames': 'Court Names',
+  'setup.courtNamesOptional': '(optional)',
+  'setup.courtPlaceholder': 'Court {n}',
+  'setup.startTournament': 'Start Tournament',
+  'setup.notEnoughPlayers': 'Not enough players for even 1 court',
+
+  // Setup: Tournament in progress
+  'setup.inProgress': 'Tournament in Progress',
+  'setup.inProgressDesc': '"{name}" is active (Round {current}{total}).',
+  'setup.inProgressOf': ' of {n}',
+  'setup.resume': 'Resume',
+  'setup.startNew': 'Start New',
+
+  // Schedule preview
+  'preview.title': 'Schedule Preview',
+  'preview.partnerFrequency': 'Partner Frequency',
+  'preview.opponentFrequency': 'Opponent Frequency',
+  'preview.back': 'Back',
+  'preview.regenerate': 'Regenerate',
+  'preview.confirmStart': 'Confirm & Start',
+
+  // Round page
+  'round.noTournament': 'No tournament in progress.',
+  'round.goToSetup': 'Go to Setup',
+  'round.roundsCompleted': '{n} round(s) completed',
+  'round.finishTitle': 'Finish Tournament?',
+  'round.finishConfirm': 'Finish',
+  'round.finishMessage': 'This will end the tournament and show final results. Are you sure?',
+  'round.court': 'Court {n}',
+
+  // Round controls
+  'roundControls.previous': 'Previous',
+  'roundControls.round': 'Round {current}{total}',
+  'roundControls.roundOf': ' / {n}',
+  'roundControls.next': 'Next',
+  'roundControls.finishTournament': 'Finish Tournament',
+
+  // Court card
+  'court.win': 'WIN',
+  'court.total': 'Total: {n} points',
+  'court.clear': 'Clear',
+
+  // Pause list
+  'pause.sittingOut': 'Sitting out:',
+
+  // Round stats
+  'roundStats.standings': 'Standings',
+  'roundStats.rank': '#',
+  'roundStats.name': 'Name',
+  'roundStats.points': 'Pts',
+  'roundStats.wins': 'W',
+
+  // Leaderboard page
+  'leaderboard.noData': 'No tournament data available.',
+  'leaderboard.goToSetup': 'Go to Setup',
+  'leaderboard.finalResults': 'Final Results',
+  'leaderboard.currentStandings': 'Current Standings',
+  'leaderboard.exportCsv': 'Export CSV',
+  'leaderboard.copyText': 'Copy Text',
+  'leaderboard.players': 'Players',
+  'leaderboard.roundsPlayed': 'Rounds Played',
+  'leaderboard.courts': 'Courts',
+  'leaderboard.scoring': 'Scoring',
+  'leaderboard.pts': '{n}pts',
+  'leaderboard.wl': 'W/L',
+  'leaderboard.newTournament': 'New Tournament',
+
+  // Leaderboard table
+  'table.rank': 'Rank',
+  'table.player': 'Player',
+  'table.points': 'Points',
+  'table.wins': 'W',
+  'table.losses': 'L',
+  'table.played': 'Played',
+  'table.paused': 'Paused',
+  'table.diff': '+/-',
+  'table.1st': '1st',
+  'table.2nd': '2nd',
+  'table.3rd': '3rd',
+  'table.paused_badge': 'Paused',
+  'table.with': 'w/',
+  'table.vs': 'vs',
+
+  // Simulator page
+  'simulator.title': 'Algorithm Simulator',
+  'simulator.players': 'Players',
+  'simulator.courts': 'Courts',
+  'simulator.rounds': 'Rounds',
+  'simulator.iterations': 'Iterations',
+  'simulator.greedy': 'Greedy',
+  'simulator.greedyTooltip': 'Builds the schedule round-by-round, always picking the fairest option. Fast and consistent \u2014 this is the same algorithm used when starting a real tournament.',
+  'simulator.monteCarlo': 'Monte Carlo',
+  'simulator.monteCarloTooltip': 'Runs the algorithm many times with shuffled player orders and keeps the best result. Slower but may find better solutions.',
+  'simulator.running': 'Running...',
+  'simulator.runSimulation': 'Run Simulation',
+  'simulator.courtInfo': '{courts} effective court(s), {playing} players per round, {sitting} pausing',
+  'simulator.partnerFrequency': 'Partner Frequency',
+  'simulator.opponentFrequency': 'Opponent Frequency',
+
+  // Schedule preview component
+  'schedulePreview.title': 'Schedule Preview ({n} rounds)',
+  'schedulePreview.round': 'Round {n}',
+  'schedulePreview.court': 'Court {n}:',
+  'schedulePreview.vs': 'vs',
+  'schedulePreview.paused': 'Paused:',
+
+  // Fairness cards
+  'fairness.gamesPlayedStdDev': 'Games Played StdDev',
+  'fairness.gamesPlayedStdDevTooltip': 'How evenly games are distributed. Lower is fairer \u2014 0 means everyone played the same number of games.',
+  'fairness.pauseCountStdDev': 'Pause Count StdDev',
+  'fairness.pauseCountStdDevTooltip': 'How evenly sit-out rounds are distributed. Lower is fairer \u2014 0 means everyone sat out equally.',
+  'fairness.maxPauseGap': 'Max Pause Gap',
+  'fairness.maxPauseGapTooltip': 'Biggest difference in sit-out counts between any two players. Ideally 0 or 1.',
+  'fairness.maxGamesGap': 'Max Games Gap',
+  'fairness.maxGamesGapTooltip': 'Biggest difference in games played between any two players. Ideally 0 or 1.',
+  'fairness.partnerVariety': 'Partner Variety',
+  'fairness.partnerVarietyTooltip': 'How evenly partner pairings are spread. 100% means every player partnered with every other equally often.',
+  'fairness.opponentVariety': 'Opponent Variety',
+  'fairness.opponentVarietyTooltip': 'How evenly opponent matchups are spread. 100% means every player faced every other equally often.',
+  'fairness.partnerRepeats': 'Partner Repeats',
+  'fairness.partnerRepeatsTooltip': 'Times the same two players were paired more than once. 0 is ideal.',
+  'fairness.opponentRepeats': 'Opponent Repeats',
+  'fairness.opponentRepeatsTooltip': 'Times two players faced each other more than once. 0 is ideal.',
+
+  // Modal
+  'modal.cancel': 'Cancel',
+  'modal.confirm': 'Confirm',
+
+  // Error boundary
+  'error.title': 'Something went wrong',
+  'error.reload': 'Reload',
+
+  // Export
+  'export.rank': 'Rank',
+  'export.name': 'Name',
+  'export.points': 'Points',
+  'export.wins': 'Wins',
+  'export.losses': 'Losses',
+  'export.played': 'Played',
+  'export.paused': 'Paused',
+  'export.pointDiff': 'Point Diff',
+  'export.textRank': '#',
+  'export.textName': 'Name',
+  'export.textPts': 'Pts',
+  'export.textWins': 'W',
+  'export.textLosses': 'L',
+
+  // Validation
+  'validation.minPlayers': 'At least {min} players required',
+  'validation.maxPlayers': 'Maximum {max} players allowed',
+  'validation.minCourts': 'At least {min} court required',
+  'validation.maxCourts': 'Maximum {max} courts allowed',
+  'validation.courtsUsable': 'Only {max} court(s) usable with {count} players',
+  'validation.minRounds': 'At least {min} round required',
+  'validation.maxRounds': 'Maximum {max} rounds allowed',
+  'validation.duplicateName': 'Duplicate name: {name}',
+}

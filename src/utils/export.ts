@@ -1,16 +1,21 @@
 import type { LeaderboardEntry } from '../types'
 
-export function leaderboardToCsv(entries: LeaderboardEntry[]): string {
-  const headers = ['Rank', 'Name', 'Points', 'Wins', 'Losses', 'Played', 'Paused', 'Point Diff']
+type TFn = (key: string, params?: Record<string, string | number>) => string
+
+export function leaderboardToCsv(entries: LeaderboardEntry[], t: TFn): string {
+  const headers = [
+    t('export.rank'), t('export.name'), t('export.points'), t('export.wins'),
+    t('export.losses'), t('export.played'), t('export.paused'), t('export.pointDiff'),
+  ]
   const rows = entries.map(e => [
     e.rank, e.playerName, e.points, e.wins, e.losses, e.gamesPlayed, e.gamesPaused, e.pointDifferential
   ])
   return [headers.join(','), ...rows.map(r => r.join(','))].join('\n')
 }
 
-export function leaderboardToText(entries: LeaderboardEntry[]): string {
+export function leaderboardToText(entries: LeaderboardEntry[], t: TFn): string {
   const maxName = Math.max(...entries.map(e => e.playerName.length), 4)
-  const header = `${'#'.padStart(3)} ${'Name'.padEnd(maxName)} ${'Pts'.padStart(4)} ${'W'.padStart(3)} ${'L'.padStart(3)}`
+  const header = `${t('export.textRank').padStart(3)} ${t('export.textName').padEnd(maxName)} ${t('export.textPts').padStart(4)} ${t('export.textWins').padStart(3)} ${t('export.textLosses').padStart(3)}`
   const separator = '-'.repeat(header.length)
   const rows = entries.map(e =>
     `${String(e.rank).padStart(3)} ${e.playerName.padEnd(maxName)} ${String(e.points).padStart(4)} ${String(e.wins).padStart(3)} ${String(e.losses).padStart(3)}`

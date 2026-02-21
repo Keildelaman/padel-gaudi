@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { createPortal } from 'react-dom'
+import { useT } from '../../i18n'
 import type { MatchAssignment, ScoringConfig } from '../../types'
 
 interface CourtCardProps {
@@ -102,6 +103,8 @@ function WinLossCourtLayout({
   onClearScore: () => void
   disabled?: boolean
 }) {
+  const { t } = useT()
+
   const handleClick = (team: 1 | 2) => {
     if (disabled) return
     if (winner === team) {
@@ -130,7 +133,7 @@ function WinLossCourtLayout({
         >
           <PlayerPill name={team1Name1} color="blue" />
           <PlayerPill name={team1Name2} color="blue" />
-          {winner === 1 && <span className="text-[11px] font-bold text-white bg-team-blue/80 px-2 py-0.5 rounded-full mt-1">WIN</span>}
+          {winner === 1 && <span className="text-[11px] font-bold text-white bg-team-blue/80 px-2 py-0.5 rounded-full mt-1">{t('court.win')}</span>}
         </button>
 
         {/* Team 2 (red) */}
@@ -146,7 +149,7 @@ function WinLossCourtLayout({
         >
           <PlayerPill name={team2Name1} color="red" />
           <PlayerPill name={team2Name2} color="red" />
-          {winner === 2 && <span className="text-[11px] font-bold text-white bg-team-red/80 px-2 py-0.5 rounded-full mt-1">WIN</span>}
+          {winner === 2 && <span className="text-[11px] font-bold text-white bg-team-red/80 px-2 py-0.5 rounded-full mt-1">{t('court.win')}</span>}
         </button>
       </div>
     </div>
@@ -168,6 +171,7 @@ function PointsCourtLayout({
   onClearScore: () => void
   disabled?: boolean
 }) {
+  const { t } = useT()
   const [text1, setText1] = useState(score1 != null ? String(score1) : '')
   const [text2, setText2] = useState(score2 != null ? String(score2) : '')
 
@@ -247,7 +251,7 @@ function PointsCourtLayout({
         </div>
       </div>
 
-      <p className="text-[10px] text-gray-400 text-center pb-2">Total: {max} points</p>
+      <p className="text-[10px] text-gray-400 text-center pb-2">{t('court.total', { n: max })}</p>
     </>
   )
 }
@@ -263,6 +267,7 @@ function ScoreInput({ value, max, color, disabled, onChange, onSelect, onClear }
   onSelect: (n: number) => void
   onClear: () => void
 }) {
+  const { t } = useT()
   const [open, setOpen] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
   const panelRef = useRef<HTMLDivElement>(null)
@@ -345,7 +350,7 @@ function ScoreInput({ value, max, color, disabled, onChange, onSelect, onClear }
               }}
               className="mt-1.5 w-full text-xs text-gray-400 hover:text-red-500 py-1"
             >
-              Clear
+              {t('court.clear')}
             </button>
           )}
         </div>,
