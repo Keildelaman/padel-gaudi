@@ -9,7 +9,14 @@ type Pair = [string, string]
 export function assignOpponents(
   pairs: Pair[],
   history: MatchHistory,
+  randomize = false,
 ): GeneratedMatch[] {
+  // Build index map for O(1) pair lookups (instead of O(M) indexOf)
+  const pairIndex = new Map<Pair, number>()
+  for (let idx = 0; idx < pairs.length; idx++) {
+    pairIndex.set(pairs[idx], idx)
+  }
+
   // Generate all possible matchups (pair-of-pairs)
   const matchups: { p1: Pair; p2: Pair; cost: number }[] = []
   for (let i = 0; i < pairs.length; i++) {
@@ -22,6 +29,7 @@ export function assignOpponents(
   // Sort by cost ascending
   matchups.sort((a, b) => {
     if (a.cost !== b.cost) return a.cost - b.cost
+    if (randomize) return Math.random() - 0.5
     return 0
   })
 
@@ -31,8 +39,8 @@ export function assignOpponents(
   let courtIndex = 0
 
   for (const matchup of matchups) {
-    const i = pairs.indexOf(matchup.p1)
-    const j = pairs.indexOf(matchup.p2)
+    const i = pairIndex.get(matchup.p1)!
+    const j = pairIndex.get(matchup.p2)!
     if (usedPairs.has(i) || usedPairs.has(j)) continue
 
     matches.push({

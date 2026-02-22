@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react'
-import { Card, Button, NumberInput } from '../components/shared'
+import { Card, Button, NumberInput, GenerationInfoBar } from '../components/shared'
 import { HeatmapGrid } from '../components/simulator/HeatmapGrid'
 import { FairnessCards } from '../components/simulator/FairnessCards'
 import { SchedulePreview } from '../components/simulator/SchedulePreview'
@@ -34,7 +34,17 @@ export function SimulatorPage() {
       if (mode === 'montecarlo') {
         schedule = generateScheduleMonteCarlo(config, iterations)
       } else {
+        const start = performance.now()
         schedule = generateSchedule(config)
+        schedule.info = {
+          method: 'greedy',
+          iterations: 1,
+          useOptimal: false,
+          optimalDisabledReason: null,
+          budgetExhaustedCount: 0,
+          totalBacktrackCalls: 0,
+          elapsedMs: Math.round(performance.now() - start),
+        }
       }
 
       const metrics = computeFairnessMetrics(schedule, playerIds)
@@ -103,6 +113,10 @@ export function SimulatorPage() {
         <>
           {/* Fairness Metrics */}
           <FairnessCards metrics={result.metrics} />
+
+          {result.schedule.info && (
+            <GenerationInfoBar info={result.schedule.info} />
+          )}
 
           {/* Heatmaps side by side */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

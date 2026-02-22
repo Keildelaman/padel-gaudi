@@ -21,6 +21,6 @@ export interface FairnessMetrics {
   maxGamesGap: number
   partnerVarietyIndex: number  // 0-1, 1 = perfect
   opponentVarietyIndex: number // 0-1, 1 = perfect
-  totalPartnerRepeats: number
-  totalOpponentRepeats: number
+  maxPartnerGap: number   // max - min across all pair partner counts
+  maxOpponentGap: number  // max - min across all pair opponent counts
 }

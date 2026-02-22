@@ -48,6 +48,7 @@ export const de: TranslationMap = {
   'preview.back': 'Zurück',
   'preview.regenerate': 'Neu generieren',
   'preview.confirmStart': 'Bestätigen & Starten',
+  'preview.openEndedHint': 'Der Algorithmus berechnet 30 Runden voraus, aber die Fairness ist progressiv \u2014 jede Runde ist f\u00fcr sich optimiert. Ihr k\u00f6nnt jederzeit aufh\u00f6ren.',
 
   // Round page
   'round.noTournament': 'Kein Turnier aktiv.',
@@ -147,10 +148,23 @@ export const de: TranslationMap = {
   'fairness.partnerVarietyTooltip': 'Wie gleichmäßig Partnerpaarungen verteilt sind. 100% bedeutet jeder hat mit jedem gleich oft gespielt.',
   'fairness.opponentVariety': 'Gegner-Vielfalt',
   'fairness.opponentVarietyTooltip': 'Wie gleichmäßig Gegnerpaarungen verteilt sind. 100% bedeutet jeder hat gegen jeden gleich oft gespielt.',
-  'fairness.partnerRepeats': 'Partner-Wiederholungen',
-  'fairness.partnerRepeatsTooltip': 'Wie oft dieselben zwei Spieler mehr als einmal zusammengespielt haben. 0 ist ideal.',
-  'fairness.opponentRepeats': 'Gegner-Wiederholungen',
-  'fairness.opponentRepeatsTooltip': 'Wie oft zwei Spieler mehr als einmal gegeneinander gespielt haben. 0 ist ideal.',
+  'fairness.partnerSpread': 'Partner-Spreizung',
+  'fairness.partnerSpreadTooltip': 'Größter Unterschied in Partner-Häufigkeit zwischen zwei Spielerpaaren. 0-1 ist ideal.',
+  'fairness.opponentSpread': 'Gegner-Spreizung',
+  'fairness.opponentSpreadTooltip': 'Größter Unterschied in Gegner-Häufigkeit zwischen zwei Spielerpaaren. 0-1 ist ideal.',
+
+  // Generation info
+  'setup.generating': 'Spielplan wird erstellt...',
+  'round.extending': 'Weitere Runden werden generiert...',
+  'gen.elapsed': '{ms}ms',
+  'gen.montecarlo': 'Monte Carlo ({n} Iterationen)',
+  'gen.greedy': 'Greedy (1 Durchlauf)',
+  'gen.optimalMatching': 'Optimales Matching',
+  'gen.greedyMatching': 'Greedy Matching',
+  'gen.optimalDisabled': 'Optimal deaktiviert: {reason}',
+  'gen.budgetHits': 'Budget {n}x erreicht',
+  'gen.noBudgetHits': 'kein Budget erreicht',
+  'gen.activePlayers': '{n} aktive Spieler',
 
   // Modal
   'modal.cancel': 'Abbrechen',

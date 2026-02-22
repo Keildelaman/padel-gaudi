@@ -15,8 +15,19 @@ export interface MatchHistory {
   opponentCount: Record<string, Record<string, number>> // opponentCount[a][b] = times a faced b
 }
 
+export interface GenerationInfo {
+  method: 'greedy' | 'montecarlo'
+  iterations: number            // MC iterations run (1 for greedy)
+  useOptimal: boolean           // was optimal matching used
+  optimalDisabledReason: string | null  // why optimal was disabled, if applicable
+  budgetExhaustedCount: number  // how many times backtracking hit its cap
+  totalBacktrackCalls: number   // total backtrack nodes visited across entire generation
+  elapsedMs: number             // wall-clock time
+}
+
 export interface GeneratedSchedule {
   rounds: GeneratedRound[]
+  info?: GenerationInfo
 }
 
 export interface GeneratedRound {

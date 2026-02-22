@@ -48,6 +48,7 @@ export const en: TranslationMap = {
   'preview.back': 'Back',
   'preview.regenerate': 'Regenerate',
   'preview.confirmStart': 'Confirm & Start',
+  'preview.openEndedHint': 'The algorithm pre-calculates 30 rounds, but fairness is progressive \u2014 each round is individually optimized. You can stop at any time.',
 
   // Round page
   'round.noTournament': 'No tournament in progress.',
@@ -147,10 +148,23 @@ export const en: TranslationMap = {
   'fairness.partnerVarietyTooltip': 'How evenly partner pairings are spread. 100% means every player partnered with every other equally often.',
   'fairness.opponentVariety': 'Opponent Variety',
   'fairness.opponentVarietyTooltip': 'How evenly opponent matchups are spread. 100% means every player faced every other equally often.',
-  'fairness.partnerRepeats': 'Partner Repeats',
-  'fairness.partnerRepeatsTooltip': 'Times the same two players were paired more than once. 0 is ideal.',
-  'fairness.opponentRepeats': 'Opponent Repeats',
-  'fairness.opponentRepeatsTooltip': 'Times two players faced each other more than once. 0 is ideal.',
+  'fairness.partnerSpread': 'Partner Spread',
+  'fairness.partnerSpreadTooltip': 'Biggest gap in partner counts between any two pairs. 0-1 is ideal.',
+  'fairness.opponentSpread': 'Opponent Spread',
+  'fairness.opponentSpreadTooltip': 'Biggest gap in opponent counts between any two pairs. 0-1 is ideal.',
+
+  // Generation info
+  'setup.generating': 'Generating schedule...',
+  'round.extending': 'Generating additional rounds...',
+  'gen.elapsed': '{ms}ms',
+  'gen.montecarlo': 'Monte Carlo ({n} iterations)',
+  'gen.greedy': 'Greedy (1 pass)',
+  'gen.optimalMatching': 'Optimal matching',
+  'gen.greedyMatching': 'Greedy matching',
+  'gen.optimalDisabled': 'optimal disabled: {reason}',
+  'gen.budgetHits': 'budget hit {n}x',
+  'gen.noBudgetHits': 'no budget hits',
+  'gen.activePlayers': '{n} active players',
 
   // Modal
   'modal.cancel': 'Cancel',

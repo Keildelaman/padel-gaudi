@@ -1,12 +1,12 @@
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, useRef } from 'react'
 import { useTournament, isRoundComplete } from '../state'
 import { ProgressBar, Modal } from '../components/shared'
 import { CourtCard } from '../components/round/CourtCard'
 import { PauseList } from '../components/round/PauseList'
 import { RoundControls } from '../components/round/RoundControls'
 import { RoundStats } from '../components/round/RoundStats'
-import { generateAdditionalRounds } from '../algorithm'
-import { OPEN_ENDED_EXTEND_THRESHOLD, OPEN_ENDED_BATCH_SIZE } from '../constants'
+import { generateAdditionalRoundsMonteCarlo } from '../algorithm'
+import { OPEN_ENDED_EXTEND_THRESHOLD, OPEN_ENDED_BATCH_SIZE, MONTE_CARLO_DEFAULT_ITERATIONS } from '../constants'
 import { useT } from '../i18n'
 import type { Round } from '../types'
 
@@ -14,43 +14,52 @@ export function RoundPage() {
   const { state, dispatch } = useTournament()
   const { t } = useT()
   const [showFinishModal, setShowFinishModal] = useState(false)
+  const [extending, setExtending] = useState(false)
+  const extendingRef = useRef(false)
   const tournament = state.tournament
 
   // Auto-extend rounds for open-ended tournaments
   useEffect(() => {
-    if (!tournament || !tournament.openEnded) return
+    if (!tournament || !tournament.openEnded || extendingRef.current) return
     const remaining = tournament.totalRounds - tournament.currentRound
     if (remaining < OPEN_ENDED_EXTEND_THRESHOLD) {
-      const playerIds = tournament.players.map(p => p.id)
-      const existingGenerated = tournament.rounds.map(r => ({
-        roundNumber: r.roundNumber,
-        matches: r.matches.map(m => ({
-          courtIndex: m.courtIndex,
-          team1: m.team1,
-          team2: m.team2,
-        })),
-        pausedPlayerIds: r.pausedPlayerIds,
-      }))
+      extendingRef.current = true
+      setExtending(true)
+      setTimeout(() => {
+        const playerIds = tournament.players.map(p => p.id)
+        const existingGenerated = tournament.rounds.map(r => ({
+          roundNumber: r.roundNumber,
+          matches: r.matches.map(m => ({
+            courtIndex: m.courtIndex,
+            team1: m.team1,
+            team2: m.team2,
+          })),
+          pausedPlayerIds: r.pausedPlayerIds,
+        }))
 
-      const additional = generateAdditionalRounds(
-        playerIds,
-        tournament.courts,
-        existingGenerated,
-        OPEN_ENDED_BATCH_SIZE,
-      )
+        const { rounds: additional } = generateAdditionalRoundsMonteCarlo(
+          playerIds,
+          tournament.courts,
+          existingGenerated,
+          OPEN_ENDED_BATCH_SIZE,
+          MONTE_CARLO_DEFAULT_ITERATIONS,
+        )
 
-      const newRounds: Round[] = additional.map(gr => ({
-        roundNumber: gr.roundNumber,
-        matches: gr.matches.map(gm => ({
-          courtIndex: gm.courtIndex,
-          team1: gm.team1,
-          team2: gm.team2,
-        })),
-        pausedPlayerIds: gr.pausedPlayerIds,
-        completed: false,
-      }))
+        const newRounds: Round[] = additional.map(gr => ({
+          roundNumber: gr.roundNumber,
+          matches: gr.matches.map(gm => ({
+            courtIndex: gm.courtIndex,
+            team1: gm.team1,
+            team2: gm.team2,
+          })),
+          pausedPlayerIds: gr.pausedPlayerIds,
+          completed: false,
+        }))
 
-      dispatch({ type: 'EXTEND_ROUNDS', payload: { newRounds } })
+        dispatch({ type: 'EXTEND_ROUNDS', payload: { newRounds } })
+        setExtending(false)
+        extendingRef.current = false
+      }, 10)
     }
   }, [tournament?.currentRound, tournament?.openEnded, tournament?.totalRounds])
 
@@ -159,6 +168,10 @@ export function RoundPage() {
         }}
         onFinish={() => setShowFinishModal(true)}
       />
+
+      {extending && (
+        <p className="text-sm text-gray-400 animate-pulse text-center">{t('round.extending')}</p>
+      )}
 
       <RoundStats tournament={tournament} />
 

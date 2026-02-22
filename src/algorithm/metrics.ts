@@ -56,15 +56,17 @@ export function computeFairnessMetrics(
   const partnerVarietyIndex = varietyIndex(partnerMatrix, n)
   const opponentVarietyIndex = varietyIndex(opponentMatrix, n)
 
-  // Count total repeats
-  let totalPartnerRepeats = 0
-  let totalOpponentRepeats = 0
+  // Compute max gap (spread) across all pair counts
+  const partnerValues: number[] = []
+  const opponentValues: number[] = []
   for (let i = 0; i < n; i++) {
     for (let j = i + 1; j < n; j++) {
-      if (partnerMatrix[i][j] > 1) totalPartnerRepeats += partnerMatrix[i][j] - 1
-      if (opponentMatrix[i][j] > 1) totalOpponentRepeats += opponentMatrix[i][j] - 1
+      partnerValues.push(partnerMatrix[i][j])
+      opponentValues.push(opponentMatrix[i][j])
     }
   }
+  const maxPartnerGap = partnerValues.length > 0 ? Math.max(...partnerValues) - Math.min(...partnerValues) : 0
+  const maxOpponentGap = opponentValues.length > 0 ? Math.max(...opponentValues) - Math.min(...opponentValues) : 0
 
   return {
     gamesPlayedStdDev: gamesStdDev,
@@ -73,8 +75,8 @@ export function computeFairnessMetrics(
     maxGamesGap,
     partnerVarietyIndex,
     opponentVarietyIndex,
-    totalPartnerRepeats,
-    totalOpponentRepeats,
+    maxPartnerGap,
+    maxOpponentGap,
   }
 }
 

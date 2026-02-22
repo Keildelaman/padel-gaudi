@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { useTournament } from '../state'
-import { Card, Button, NumberInput } from '../components/shared'
+import { Card, Button, NumberInput, GenerationInfoBar } from '../components/shared'
 import { FairnessCards } from '../components/simulator/FairnessCards'
 import { HeatmapGrid } from '../components/simulator/HeatmapGrid'
 import {
@@ -13,7 +13,7 @@ import { generateScheduleMonteCarlo, computeFairnessMetrics } from '../algorithm
 import { buildMatrices } from '../algorithm/metrics'
 import { generateId } from '../utils/ids'
 import { useT } from '../i18n'
-import type { ScoringMode, Player, Round, GeneratedSchedule, FairnessMetrics } from '../types'
+import type { ScoringMode, Player, Round, GeneratedSchedule, GenerationInfo, FairnessMetrics } from '../types'
 
 function ensureTrailingEmpty(names: string[]): string[] {
   if (names.length === 0 || names[names.length - 1].trim() !== '') {
@@ -30,6 +30,7 @@ interface SchedulePreviewData {
   opponentMatrix: number[][]
   playerLabels: string[]
   players: Player[]
+  generationInfo?: GenerationInfo
 }
 
 export function SetupPage() {
@@ -49,6 +50,7 @@ export function SetupPage() {
   const [courtNames, setCourtNames] = useState<string[]>(draft?.courtNames ?? [])
   const [error, setError] = useState<string | null>(null)
   const [preview, setPreview] = useState<SchedulePreviewData | null>(null)
+  const [generating, setGenerating] = useState(false)
 
   useEffect(() => {
     dispatch({
@@ -90,7 +92,7 @@ export function SetupPage() {
     }
   }
 
-  const generatePreview = useCallback((players: Player[], numCourts: number, numRounds: number) => {
+  const generatePreview = useCallback((players: Player[], numCourts: number, numRounds: number): SchedulePreviewData => {
     const playerIds = players.map(p => p.id)
     const config = { playerIds, courts: numCourts, totalRounds: numRounds }
     const schedule = generateScheduleMonteCarlo(config, MONTE_CARLO_DEFAULT_ITERATIONS)
@@ -116,6 +118,7 @@ export function SetupPage() {
       opponentMatrix,
       playerLabels: players.map(p => p.name),
       players,
+      generationInfo: schedule.info,
     }
   }, [])
 
@@ -128,13 +131,21 @@ export function SetupPage() {
 
     const players: Player[] = names.map(n => ({ id: generateId(), name: n }))
     const effectiveRounds = openEnded ? 30 : rounds
-    setPreview(generatePreview(players, eCourts, effectiveRounds))
+    setGenerating(true)
+    setTimeout(() => {
+      setPreview(generatePreview(players, eCourts, effectiveRounds))
+      setGenerating(false)
+    }, 10)
   }
 
   const handleRegenerate = () => {
     if (!preview) return
     const effectiveRounds = openEnded ? 30 : rounds
-    setPreview(generatePreview(preview.players, eCourts, effectiveRounds))
+    setGenerating(true)
+    setTimeout(() => {
+      setPreview(generatePreview(preview.players, eCourts, effectiveRounds))
+      setGenerating(false)
+    }, 10)
   }
 
   const handleConfirmStart = () => {
@@ -185,7 +196,15 @@ export function SetupPage() {
       <div className="max-w-5xl mx-auto space-y-6">
         <h2 className="text-2xl font-bold border-l-4 border-primary pl-3">{t('preview.title')}</h2>
 
+        {openEnded && (
+          <p className="text-sm text-gray-500 italic">{t('preview.openEndedHint')}</p>
+        )}
+
         <FairnessCards metrics={preview.metrics} />
+
+        {preview.generationInfo && (
+          <GenerationInfoBar info={preview.generationInfo} />
+        )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Card>
@@ -213,8 +232,8 @@ export function SetupPage() {
             {t('preview.back')}
           </Button>
           <div className="flex gap-3">
-            <Button variant="secondary" onClick={handleRegenerate}>
-              {t('preview.regenerate')}
+            <Button variant="secondary" onClick={handleRegenerate} disabled={generating}>
+              {generating ? t('setup.generating') : t('preview.regenerate')}
             </Button>
             <Button onClick={handleConfirmStart}>
               {t('preview.confirmStart')}
@@ -417,8 +436,8 @@ export function SetupPage() {
         <p className="text-red-600 text-sm font-medium">{error}</p>
       )}
 
-      <Button fullWidth onClick={handleStart} disabled={validNames.length < MIN_PLAYERS}>
-        {t('setup.startTournament')}
+      <Button fullWidth onClick={handleStart} disabled={validNames.length < MIN_PLAYERS || generating}>
+        {generating ? t('setup.generating') : t('setup.startTournament')}
       </Button>
     </div>
   )

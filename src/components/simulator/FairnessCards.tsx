@@ -53,16 +53,16 @@ export function FairnessCards({ metrics }: FairnessCardsProps) {
       tooltipKey: 'fairness.opponentVarietyTooltip',
     },
     {
-      labelKey: 'fairness.partnerRepeats',
-      value: String(metrics.totalPartnerRepeats),
-      level: metrics.totalPartnerRepeats === 0 ? 'good' : metrics.totalPartnerRepeats <= 3 ? 'warn' : 'bad',
-      tooltipKey: 'fairness.partnerRepeatsTooltip',
+      labelKey: 'fairness.partnerSpread',
+      value: String(metrics.maxPartnerGap),
+      level: metrics.maxPartnerGap <= 1 ? 'good' : metrics.maxPartnerGap <= 2 ? 'warn' : 'bad',
+      tooltipKey: 'fairness.partnerSpreadTooltip',
     },
     {
-      labelKey: 'fairness.opponentRepeats',
-      value: String(metrics.totalOpponentRepeats),
-      level: metrics.totalOpponentRepeats === 0 ? 'good' : metrics.totalOpponentRepeats <= 5 ? 'warn' : 'bad',
-      tooltipKey: 'fairness.opponentRepeatsTooltip',
+      labelKey: 'fairness.opponentSpread',
+      value: String(metrics.maxOpponentGap),
+      level: metrics.maxOpponentGap <= 1 ? 'good' : metrics.maxOpponentGap <= 3 ? 'warn' : 'bad',
+      tooltipKey: 'fairness.opponentSpreadTooltip',
     },
   ]
 
