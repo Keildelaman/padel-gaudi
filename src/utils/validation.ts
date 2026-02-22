@@ -32,8 +32,8 @@ export function validatePlayerNames(names: string[], t: TFn): string | null {
 }
 
 export function suggestRoundCount(playerCount: number, courts: number): number {
-  const playersPerRound = courts * PLAYERS_PER_COURT
-  return Math.ceil((playerCount * (playerCount - 1)) / (2 * playersPerRound))
+  const partnershipsPerRound = courts * 2  // each court produces 2 partner pairs
+  return Math.ceil((playerCount * (playerCount - 1)) / (2 * partnershipsPerRound))
 }
 
 export function effectiveCourts(playerCount: number, requestedCourts: number): number {
