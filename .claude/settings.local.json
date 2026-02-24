@@ -29,7 +29,9 @@
       "Bash(cd /c/Users/Manuel/Dev/VSCode_Projects/Claude_Projects/padel_tournament_scheduler && npx tsc --noEmit 2>&1)",
       "Bash(cd /c/Users/Manuel/Dev/VSCode_Projects/Claude_Projects/padel_tournament_scheduler && git add src/utils/validation.ts src/i18n/en.ts src/i18n/de.ts && git commit -m \"$\\(cat <<'EOF'\nFix suggested round count formula \\(was off by 2x\\)\n\nThe denominator used players-per-round instead of partnerships-per-round,\nproducing suggestions that were half of the correct minimum. E.g. 4 players\n/ 1 court now correctly suggests 3 rounds instead of 2.\n\nCo-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>\nEOF\n\\)\" && git push 2>&1)",
       "WebFetch(domain:www.padelamericano.org)",
-      "WebFetch(domain:padelamericano.org)"
+      "WebFetch(domain:padelamericano.org)",
+      "Bash(cd /c/Users/Manuel/Dev/VSCode_Projects/Claude_Projects/padel_tournament_scheduler && npx vite build 2>&1)",
+      "Bash(cd /c/Users/Manuel/Dev/VSCode_Projects/Claude_Projects/padel_tournament_scheduler && npx tsc --noEmit 2>&1 && npx vite build 2>&1)"
     ]
   },
   "enabledPlugins": {
