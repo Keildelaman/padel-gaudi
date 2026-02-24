@@ -45,8 +45,10 @@ export function SetupPage() {
   const [pointsPerMatch, setPointsPerMatch] = useState(draft?.pointsPerMatch ?? DEFAULT_POINTS_PER_MATCH)
   const [targetScore, setTargetScore] = useState(draft?.targetScore ?? DEFAULT_TARGET_SCORE)
   const [matchDurationMinutes, setMatchDurationMinutes] = useState(draft?.matchDurationMinutes ?? DEFAULT_MATCH_DURATION_MINUTES)
+  const defaultPlayerNames = Array.from({ length: 4 }, (_, i) => t('setup.playerPlaceholder', { n: i + 1 }))
+  const draftHasNames = draft?.playerNames?.some(n => n.trim().length > 0)
   const [playerNames, setPlayerNames] = useState<string[]>(
-    ensureTrailingEmpty(draft?.playerNames ?? ['', '', '', ''])
+    ensureTrailingEmpty(draftHasNames ? draft.playerNames : defaultPlayerNames)
   )
   const [courts, setCourts] = useState(draft?.courts ?? 1)
   const [rounds, setRounds] = useState(draft?.rounds ?? 6)
@@ -59,6 +61,7 @@ export function SetupPage() {
   const [keepBest, setKeepBest] = useState(true)
   const [keptMessage, setKeptMessage] = useState(false)
   const [editingName, setEditingName] = useState(false)
+  const [showCourtNames, setShowCourtNames] = useState(false)
   const nameInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -222,11 +225,32 @@ export function SetupPage() {
           <p className="text-sm text-text-muted italic">{t('preview.openEndedHint')}</p>
         )}
 
-        <FairnessCards metrics={preview.metrics} />
+        <div className="flex flex-wrap gap-6">
+          <Card className="flex-1 min-w-[300px]">
+            <HeatmapGrid
+              matrix={preview.partnerMatrix}
+              labels={preview.playerLabels}
+              colorLow="#0d2818"
+              colorHigh="#10b068"
+              title={t('preview.partnerFrequency')}
+            />
+          </Card>
+          <Card className="flex-1 min-w-[300px]">
+            <HeatmapGrid
+              matrix={preview.opponentMatrix}
+              labels={preview.playerLabels}
+              colorLow="#2d1515"
+              colorHigh="#e53935"
+              title={t('preview.opponentFrequency')}
+            />
+          </Card>
+        </div>
 
         {preview.generationInfo && (
           <GenerationInfoBar info={preview.generationInfo} />
         )}
+
+        <FairnessCards metrics={preview.metrics} />
 
         <div className="flex flex-wrap items-center gap-4 text-sm">
           <label className="flex items-center gap-2 text-text-muted">
@@ -247,27 +271,6 @@ export function SetupPage() {
         {keptMessage && (
           <p className="text-xs text-text-muted italic">{t('preview.keptBetter')}</p>
         )}
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Card>
-            <HeatmapGrid
-              matrix={preview.partnerMatrix}
-              labels={preview.playerLabels}
-              colorLow="#0d2818"
-              colorHigh="#10b068"
-              title={t('preview.partnerFrequency')}
-            />
-          </Card>
-          <Card>
-            <HeatmapGrid
-              matrix={preview.opponentMatrix}
-              labels={preview.playerLabels}
-              colorLow="#2d1515"
-              colorHigh="#e53935"
-              title={t('preview.opponentFrequency')}
-            />
-          </Card>
-        </div>
 
         <div className="flex justify-between gap-3">
           <Button variant="secondary" onClick={() => setPreview(null)} disabled={generating}>
@@ -290,7 +293,7 @@ export function SetupPage() {
   return (
     <div className="max-w-3xl mx-auto space-y-6">
       {/* Inline-editable tournament title */}
-      <div className="flex items-center gap-2 border-l-4 border-accent pl-3">
+      <div className="flex items-center gap-3 border-l-4 border-accent pl-3">
         {editingName ? (
           <input
             ref={nameInputRef}
@@ -307,18 +310,18 @@ export function SetupPage() {
                 setEditingName(false)
               }
             }}
-            className="text-2xl font-bold bg-transparent border-b-2 border-border-focus text-text focus:outline-none w-full"
+            className="text-3xl font-bold bg-transparent border-b-2 border-border-focus text-text focus:outline-none w-full"
             autoFocus
           />
         ) : (
           <>
-            <h2 className="text-2xl font-bold truncate">{name || DEFAULT_TOURNAMENT_NAME}</h2>
+            <h2 className="text-3xl font-bold truncate">{name || DEFAULT_TOURNAMENT_NAME}</h2>
             <button
               onClick={() => setEditingName(true)}
               className="text-text-muted hover:text-text transition-colors shrink-0"
               title={t('setup.tournamentName')}
             >
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
                 <path d="M2.695 14.763l-1.262 3.154a.5.5 0 00.65.65l3.155-1.262a4 4 0 001.343-.885L17.5 5.5a2.121 2.121 0 00-3-3L3.58 13.42a4 4 0 00-.885 1.343z" />
               </svg>
             </button>
@@ -326,9 +329,48 @@ export function SetupPage() {
         )}
       </div>
 
+      {/* Players */}
+      <Card>
+        <label className="text-lg font-bold text-text mb-3 block">
+          {t('setup.players', { count: validNames.length })}
+        </label>
+        <div className="space-y-2">
+          {playerNames.map((pName, i) => {
+            const isAutoGrowSlot = i === playerNames.length - 1 && pName.trim() === ''
+            return (
+              <div key={i} className="flex items-center gap-2">
+                {!isAutoGrowSlot && (
+                  <span className="text-sm text-text-muted w-7 text-right tabular-nums">{i + 1}.</span>
+                )}
+                {isAutoGrowSlot && <span className="w-7" />}
+                <input
+                  ref={el => { playerRefs.current[i] = el }}
+                  type="text"
+                  value={pName}
+                  onChange={e => updatePlayer(i, e.target.value)}
+                  onKeyDown={e => handlePlayerKeyDown(i, e)}
+                  placeholder={isAutoGrowSlot ? t('setup.addPlayer') : t('setup.playerPlaceholder', { n: i + 1 })}
+                  className={`flex-1 px-4 py-3 border rounded-lg text-base bg-surface-input text-text focus:outline-none focus:border-border-focus focus:ring-1 focus:ring-border-focus ${
+                    isAutoGrowSlot ? 'border-dashed border-border/50' : 'border-border'
+                  }`}
+                />
+                {!isAutoGrowSlot && (
+                  <button
+                    onClick={() => removePlayer(i)}
+                    className="w-11 h-11 flex items-center justify-center text-lg text-text-muted hover:text-red-400 rounded-lg hover:bg-red-500/10 transition-colors"
+                  >
+                    &times;
+                  </button>
+                )}
+              </div>
+            )
+          })}
+        </div>
+      </Card>
+
       {/* Scoring Mode */}
       <Card>
-        <label className="block text-sm font-semibold text-text mb-2">{t('setup.scoringMode')}</label>
+        <label className="block text-lg font-bold text-text mb-3">{t('setup.scoringMode')}</label>
         <div className="grid grid-cols-2 gap-1 bg-surface-input rounded-lg p-1">
           {([
             ['points', t('setup.scoringPoints')],
@@ -339,7 +381,7 @@ export function SetupPage() {
             <button
               key={mode}
               onClick={() => setScoringMode(mode)}
-              className={`py-2 px-3 rounded-md text-sm font-medium transition-all ${
+              className={`py-3 px-3 rounded-md text-base font-medium transition-all ${
                 scoringMode === mode
                   ? 'bg-primary text-white shadow-md shadow-primary/20'
                   : 'text-text-muted hover:text-text'
@@ -349,9 +391,9 @@ export function SetupPage() {
             </button>
           ))}
         </div>
-        <p className="text-xs text-text-muted mt-2">{t(`setup.scoringDesc.${scoringMode}`)}</p>
+        <p className="text-sm text-text-muted mt-3">{t(`setup.scoringDesc.${scoringMode}`)}</p>
         {scoringMode === 'points' && (
-          <div className="mt-3 flex flex-col items-center">
+          <div className="mt-4 flex flex-col items-center">
             <NumberInput
               label={t('setup.pointsPerMatch')}
               value={pointsPerMatch}
@@ -359,11 +401,11 @@ export function SetupPage() {
               min={4}
               max={100}
             />
-            <p className="text-xs text-text-muted mt-1">{t('setup.pointsPerMatchHint')}</p>
+            <p className="text-sm text-text-muted mt-1">{t('setup.pointsPerMatchHint')}</p>
           </div>
         )}
         {scoringMode === 'pointsToWin' && (
-          <div className="mt-3 flex flex-col items-center">
+          <div className="mt-4 flex flex-col items-center">
             <NumberInput
               label={t('setup.targetScore')}
               value={targetScore}
@@ -371,11 +413,11 @@ export function SetupPage() {
               min={1}
               max={99}
             />
-            <p className="text-xs text-text-muted mt-1">{t('setup.targetScoreHint')}</p>
+            <p className="text-sm text-text-muted mt-1">{t('setup.targetScoreHint')}</p>
           </div>
         )}
         {scoringMode === 'timed' && (
-          <div className="mt-3 flex flex-col items-center">
+          <div className="mt-4 flex flex-col items-center">
             <NumberInput
               label={t('setup.matchDuration')}
               value={matchDurationMinutes}
@@ -383,157 +425,123 @@ export function SetupPage() {
               min={1}
               max={60}
             />
-            <p className="text-xs text-text-muted mt-1">{t('setup.matchDurationHint')}</p>
+            <p className="text-sm text-text-muted mt-1">{t('setup.matchDurationHint')}</p>
           </div>
         )}
       </Card>
 
-      {/* Two-column grid: Players + Rounds/Courts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Players */}
-        <Card>
-          <label className="text-sm font-semibold text-text mb-3 block">
-            {t('setup.players', { count: validNames.length })}
-          </label>
-          <div className="space-y-2 max-h-[400px] overflow-y-auto pr-1">
-            {playerNames.map((pName, i) => {
-              const isAutoGrowSlot = i === playerNames.length - 1 && pName.trim() === ''
-              return (
-                <div key={i} className="flex items-center gap-2">
-                  {!isAutoGrowSlot && (
-                    <span className="text-xs text-text-muted w-5 text-right tabular-nums">{i + 1}.</span>
-                  )}
-                  {isAutoGrowSlot && <span className="w-5" />}
-                  <input
-                    ref={el => { playerRefs.current[i] = el }}
-                    type="text"
-                    value={pName}
-                    onChange={e => updatePlayer(i, e.target.value)}
-                    onKeyDown={e => handlePlayerKeyDown(i, e)}
-                    placeholder={isAutoGrowSlot ? t('setup.addPlayer') : t('setup.playerPlaceholder', { n: i + 1 })}
-                    className={`flex-1 px-3 py-2 border rounded-lg text-sm bg-surface-input text-text focus:outline-none focus:border-border-focus focus:ring-1 focus:ring-border-focus ${
-                      isAutoGrowSlot ? 'border-dashed border-border/50' : 'border-border'
-                    }`}
-                  />
-                  {!isAutoGrowSlot && (
-                    <button
-                      onClick={() => removePlayer(i)}
-                      className="w-9 h-9 flex items-center justify-center text-text-muted hover:text-red-400 rounded-lg hover:bg-red-500/10"
-                    >
-                      &times;
-                    </button>
-                  )}
-                </div>
-              )
-            })}
-          </div>
-        </Card>
+      {/* Rounds & Courts — combined into one card */}
+      <Card>
+        {/* Round mode */}
+        <label className="block text-lg font-bold text-text mb-3">{t('setup.roundMode')}</label>
+        <div className="flex gap-1 bg-surface-input rounded-lg p-1 mb-4">
+          <button
+            onClick={() => setOpenEnded(false)}
+            className={`flex-1 py-3 px-3 rounded-md text-base font-medium transition-all ${
+              !openEnded
+                ? 'bg-primary text-white shadow-md shadow-primary/20'
+                : 'text-text-muted hover:text-text'
+            }`}
+          >
+            {t('setup.fixedRounds')}
+          </button>
+          <button
+            onClick={() => setOpenEnded(true)}
+            className={`flex-1 py-3 px-3 rounded-md text-base font-medium transition-all ${
+              openEnded
+                ? 'bg-primary text-white shadow-md shadow-primary/20'
+                : 'text-text-muted hover:text-text'
+            }`}
+          >
+            {t('setup.openEnded')}
+          </button>
+        </div>
 
-        {/* Rounds + Courts */}
-        <div className="space-y-6">
-          {/* Rounds card */}
-          <Card>
-            <label className="block text-sm font-semibold text-text mb-2">{t('setup.roundMode')}</label>
-            <div className="flex gap-1 bg-surface-input rounded-lg p-1 mb-4">
-              <button
-                onClick={() => setOpenEnded(false)}
-                className={`flex-1 py-2 px-3 rounded-md text-sm font-medium transition-all ${
-                  !openEnded
-                    ? 'bg-primary text-white shadow-md shadow-primary/20'
-                    : 'text-text-muted hover:text-text'
-                }`}
-              >
-                {t('setup.fixedRounds')}
-              </button>
-              <button
-                onClick={() => setOpenEnded(true)}
-                className={`flex-1 py-2 px-3 rounded-md text-sm font-medium transition-all ${
-                  openEnded
-                    ? 'bg-primary text-white shadow-md shadow-primary/20'
-                    : 'text-text-muted hover:text-text'
-                }`}
-              >
-                {t('setup.openEnded')}
-              </button>
-            </div>
-
-            {!openEnded && (
-              <>
-                <NumberInput
-                  label={t('setup.rounds')}
-                  value={rounds}
-                  onChange={setRounds}
-                  min={MIN_ROUNDS}
-                  max={MAX_ROUNDS}
-                />
-                {validNames.length >= MIN_PLAYERS && (
-                  <div className="mt-2 flex items-center gap-1 text-xs text-text-muted">
-                    <button
-                      className="text-accent hover:underline hover:text-accent-light"
-                      onClick={() => setRounds(suggested)}
-                    >
-                      {t('setup.suggested', { n: suggested })}
-                    </button>
-                    <div className="relative group">
-                      <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-white/10 text-text-muted text-[10px] font-bold cursor-help">?</span>
-                      <div className="invisible group-hover:visible absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-56 px-3 py-2 bg-gray-800 text-white text-xs rounded-lg shadow-lg z-10">
-                        {t('setup.suggestedTooltip')}
-                        <div className="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-x-4 border-x-transparent border-t-4 border-t-gray-800" />
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </>
-            )}
-            {openEnded && (
-              <p className="text-xs text-text-muted italic">{t('setup.openEndedHint')}</p>
-            )}
-          </Card>
-
-          {/* Courts card */}
-          <Card>
+        {!openEnded && (
+          <>
             <NumberInput
-              label={t('setup.courts')}
-              value={courts}
-              onChange={setCourts}
-              min={MIN_COURTS}
-              max={Math.max(1, maxCourts)}
+              label={t('setup.rounds')}
+              value={rounds}
+              onChange={setRounds}
+              min={MIN_ROUNDS}
+              max={MAX_ROUNDS}
             />
-            <p className="mt-2 text-xs text-text-muted">
-              {t('setup.courtInfo', { courts: eCourts, playing: eCourts * PLAYERS_PER_COURT, sitting: Math.max(0, validNames.length - eCourts * PLAYERS_PER_COURT) })}
-            </p>
-
-            {eCourts > 0 && (
-              <div className="mt-4">
-                <label className="block text-sm font-semibold text-text mb-2">{t('setup.courtNames')} <span className="text-text-muted/60 font-normal">{t('setup.courtNamesOptional')}</span></label>
-                <div className="space-y-2">
-                  {Array.from({ length: eCourts }, (_, i) => (
-                    <input
-                      key={i}
-                      type="text"
-                      value={courtNames[i] ?? ''}
-                      onChange={e => {
-                        const updated = [...courtNames]
-                        while (updated.length <= i) updated.push('')
-                        updated[i] = e.target.value
-                        setCourtNames(updated)
-                      }}
-                      placeholder={t('setup.courtPlaceholder', { n: i + 1 })}
-                      className="w-full px-3 py-1.5 border border-border rounded-lg text-sm bg-surface-input text-text focus:outline-none focus:border-border-focus focus:ring-1 focus:ring-border-focus"
-                    />
-                  ))}
+            {validNames.length >= MIN_PLAYERS && (
+              <div className="mt-2 flex items-center gap-1.5 text-sm text-text-muted">
+                <button
+                  className="text-accent hover:underline hover:text-accent-light"
+                  onClick={() => setRounds(suggested)}
+                >
+                  {t('setup.suggested', { n: suggested })}
+                </button>
+                <div className="relative group">
+                  <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-white/10 text-text-muted text-xs font-bold cursor-help">?</span>
+                  <div className="invisible group-hover:visible absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-56 px-3 py-2 bg-gray-800 text-white text-xs rounded-lg shadow-lg z-10">
+                    {t('setup.suggestedTooltip')}
+                    <div className="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-x-4 border-x-transparent border-t-4 border-t-gray-800" />
+                  </div>
                 </div>
               </div>
             )}
-          </Card>
-        </div>
-      </div>
+          </>
+        )}
+        {openEnded && (
+          <p className="text-sm text-text-muted italic">{t('setup.openEndedHint')}</p>
+        )}
+
+        {/* Divider */}
+        <div className="border-t border-border/50 my-5" />
+
+        {/* Courts */}
+        <NumberInput
+          label={t('setup.courts')}
+          value={courts}
+          onChange={setCourts}
+          min={MIN_COURTS}
+          max={Math.max(1, maxCourts)}
+        />
+        <p className="mt-2 text-sm text-text-muted">
+          {t('setup.courtInfo', { courts: eCourts, playing: eCourts * PLAYERS_PER_COURT, sitting: Math.max(0, validNames.length - eCourts * PLAYERS_PER_COURT) })}
+        </p>
+
+        {eCourts > 0 && (
+          <div className="mt-4">
+            <button
+              type="button"
+              onClick={() => setShowCourtNames(!showCourtNames)}
+              className="flex items-center gap-1.5 text-sm text-text-muted hover:text-text transition-colors"
+            >
+              <span className={`transition-transform ${showCourtNames ? 'rotate-90' : ''}`}>&#9654;</span>
+              {t('setup.courtNames')} <span className="text-text-muted/60 font-normal">{t('setup.courtNamesOptional')}</span>
+            </button>
+            {showCourtNames && (
+              <div className="space-y-2 mt-3">
+                {Array.from({ length: eCourts }, (_, i) => (
+                  <input
+                    key={i}
+                    type="text"
+                    value={courtNames[i] ?? ''}
+                    onChange={e => {
+                      const updated = [...courtNames]
+                      while (updated.length <= i) updated.push('')
+                      updated[i] = e.target.value
+                      setCourtNames(updated)
+                    }}
+                    placeholder={t('setup.courtPlaceholder', { n: i + 1 })}
+                    className="w-full px-4 py-2.5 border border-border rounded-lg text-base bg-surface-input text-text focus:outline-none focus:border-border-focus focus:ring-1 focus:ring-border-focus"
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </Card>
 
       {error && (
-        <p className="text-red-400 text-sm font-medium">{error}</p>
+        <p className="text-red-400 text-base font-medium">{error}</p>
       )}
 
-      <Button fullWidth onClick={handleStart} disabled={validNames.length < MIN_PLAYERS || generating}>
+      <Button fullWidth onClick={handleStart} disabled={validNames.length < MIN_PLAYERS || generating} className="!py-4 !text-lg !font-bold">
         {generating ? t('setup.generating') : t('setup.startTournament')}
       </Button>
     </div>

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { createPortal } from 'react-dom'
 
 interface HeatmapGridProps {
   matrix: number[][]
@@ -22,7 +23,7 @@ export function HeatmapGrid({ matrix, labels, colorLow, colorHigh, title }: Heat
   return (
     <div>
       <h4 className="text-sm font-semibold text-text mb-2">{title}</h4>
-      <div className="overflow-x-auto">
+      <div>
         <div
           className="inline-grid gap-px"
           style={{
@@ -61,6 +62,11 @@ export function HeatmapGrid({ matrix, labels, colorLow, colorHigh, title }: Heat
                         setTooltip({ label: `${rowLabel} & ${colLabel}: ${val}`, x: e.clientX, y: e.clientY })
                       }
                     }}
+                    onMouseMove={(e) => {
+                      if (tooltip) {
+                        setTooltip(prev => prev ? { ...prev, x: e.clientX, y: e.clientY } : null)
+                      }
+                    }}
                     onMouseLeave={() => setTooltip(null)}
                   >
                     {i === j ? '-' : val}
@@ -71,13 +77,14 @@ export function HeatmapGrid({ matrix, labels, colorLow, colorHigh, title }: Heat
           ))}
         </div>
       </div>
-      {tooltip && (
+      {tooltip && createPortal(
         <div
           className="fixed z-50 bg-gray-900 text-white text-xs px-2 py-1 rounded pointer-events-none"
           style={{ left: tooltip.x + 10, top: tooltip.y - 30 }}
         >
           {tooltip.label}
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   )
