@@ -35,6 +35,8 @@ export function tournamentReducer(state: TournamentState, action: TournamentActi
         currentPage: 'round',
         viewingRound: 1,
         setupDraft: null,
+        viewingPlayerId: null,
+        viewingTournamentId: null,
       }
     }
 

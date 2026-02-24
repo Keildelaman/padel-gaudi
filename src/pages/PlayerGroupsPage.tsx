@@ -9,7 +9,7 @@ import type { PlayerGroup } from '../types'
 const MAX_GROUPS = 3
 
 export function PlayerGroupsPage() {
-  const { pgState, pgDispatch, activeGroup } = usePlayerGroup()
+  const { pgState, pgDispatch } = usePlayerGroup()
   const { state: tournamentState } = useTournament()
   const { t } = useT()
 

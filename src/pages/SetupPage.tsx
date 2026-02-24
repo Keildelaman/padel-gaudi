@@ -50,7 +50,7 @@ export function SetupPage() {
   const defaultPlayerNames = Array.from({ length: 4 }, (_, i) => t('setup.playerPlaceholder', { n: i + 1 }))
   const draftHasNames = draft?.playerNames?.some(n => n.trim().length > 0)
   const [playerNames, setPlayerNames] = useState<string[]>(
-    ensureTrailingEmpty(draftHasNames ? draft.playerNames : defaultPlayerNames)
+    ensureTrailingEmpty(draftHasNames ? draft!.playerNames : defaultPlayerNames)
   )
   const [linkedPlayerIds, setLinkedPlayerIds] = useState<(string | null)[]>(draft?.linkedPlayerIds ?? [])
   const [showArchivedInAutocomplete, setShowArchivedInAutocomplete] = useState(false)

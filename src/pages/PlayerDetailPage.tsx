@@ -9,7 +9,7 @@ import { useT } from '../i18n'
 import { formatDate } from '../utils/dates'
 
 export function PlayerDetailPage() {
-  const { pgState, pgDispatch, activeGroup } = usePlayerGroup()
+  const { pgDispatch, activeGroup } = usePlayerGroup()
   const { state, dispatch } = useTournament()
   const { t } = useT()
 

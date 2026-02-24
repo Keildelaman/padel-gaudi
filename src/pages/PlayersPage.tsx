@@ -1,6 +1,5 @@
 import { useState, useMemo } from 'react'
 import { usePlayerGroup, useTournament, getPlayerOverviewStats } from '../state'
-import type { PlayerOverviewStats } from '../state'
 import { Card, Button, Modal } from '../components/shared'
 import { useT } from '../i18n'
 import { formatDate } from '../utils/dates'
@@ -9,7 +8,7 @@ type SortKey = 'name' | 'tournamentsPlayed' | 'totalMatches' | 'winRate' | 'last
 type SortDir = 'asc' | 'desc'
 
 export function PlayersPage() {
-  const { pgState, pgDispatch, activeGroup } = usePlayerGroup()
+  const { pgDispatch, activeGroup } = usePlayerGroup()
   const { dispatch } = useTournament()
   const { t } = useT()
 
@@ -67,8 +66,8 @@ export function PlayersPage() {
   const deletePlayer = filtered.find(s => s.playerId === deleteTarget)
 
   const SortIcon = ({ col }: { col: SortKey }) => {
-    if (sortKey !== col) return <span className="text-text-muted/30 ml-1">&#8597;</span>
-    return <span className="ml-1">{sortDir === 'asc' ? '&#9650;' : '&#9660;'}</span>
+    if (sortKey !== col) return <span className="text-text-muted/30 ml-1">{'\u2195'}</span>
+    return <span className="ml-1">{sortDir === 'asc' ? '\u25B2' : '\u25BC'}</span>
   }
 
   if (!activeGroup) {

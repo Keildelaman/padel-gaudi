@@ -13,7 +13,7 @@ export function RoundTimer({ durationMinutes, roundNumber, disabled }: RoundTime
   const [remainingMs, setRemainingMs] = useState(totalMs)
   const [timerState, setTimerState] = useState<'idle' | 'running' | 'paused' | 'finished'>('idle')
   const endTimeRef = useRef<number>(0)
-  const intervalRef = useRef<ReturnType<typeof setInterval>>()
+  const intervalRef = useRef<ReturnType<typeof setInterval> | undefined>(undefined)
 
   // Reset timer when round changes
   useEffect(() => {
