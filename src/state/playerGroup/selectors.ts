@@ -27,6 +27,7 @@ export interface PlayerOverviewStats {
   totalMatches: number
   wins: number
   losses: number
+  ties: number
   winRate: number
   lastActive: string | null
   archived: boolean
@@ -39,7 +40,7 @@ export interface PlayerDetailStats extends PlayerOverviewStats {
   avgPointsPerMatch: number
   currentWinStreak: number
   bestWinStreak: number
-  recentForm: ('W' | 'L')[]
+  recentForm: ('W' | 'L' | 'T')[]
   bestTournamentRank: number | null
   worstTournamentRank: number | null
 }
@@ -68,6 +69,7 @@ export interface TournamentHistoryEntry {
   totalPlayers: number
   wins: number
   losses: number
+  ties: number
   points: number
   excluded: boolean
 }
@@ -78,6 +80,10 @@ function getIncludedTournaments(group: PlayerGroup): TournamentRecord[] {
 
 function playerInMatch(playerId: string, match: { team1: { playerIds: [string, string] }; team2: { playerIds: [string, string] } }): boolean {
   return match.team1.playerIds.includes(playerId) || match.team2.playerIds.includes(playerId)
+}
+
+function isPlayerFillIn(playerId: string, match: { fillInPlayerIds?: string[] }): boolean {
+  return match.fillInPlayerIds?.includes(playerId) ?? false
 }
 
 function didPlayerWin(playerId: string, match: { team1: { playerIds: [string, string]; score: number }; team2: { playerIds: [string, string]; score: number }; winner?: 1 | 2 }): boolean | null {
@@ -102,6 +108,7 @@ export function getPlayerOverviewStats(group: PlayerGroup): PlayerOverviewStats[
     let totalMatches = 0
     let wins = 0
     let losses = 0
+    let ties = 0
     let lastActive: string | null = null
 
     for (const t of tournaments) {
@@ -111,10 +118,12 @@ export function getPlayerOverviewStats(group: PlayerGroup): PlayerOverviewStats[
 
       for (const match of t.matches) {
         if (!playerInMatch(player.id, match)) continue
+        if (isPlayerFillIn(player.id, match)) continue
         totalMatches++
         const won = didPlayerWin(player.id, match)
         if (won === true) wins++
         else if (won === false) losses++
+        else if (won === null) ties++
       }
     }
 
@@ -125,6 +134,7 @@ export function getPlayerOverviewStats(group: PlayerGroup): PlayerOverviewStats[
       totalMatches,
       wins,
       losses,
+      ties,
       winRate: totalMatches > 0 ? wins / totalMatches : 0,
       lastActive,
       archived: player.archived,
@@ -141,13 +151,14 @@ export function getPlayerDetailStats(group: PlayerGroup, playerId: string): Play
   let totalMatches = 0
   let wins = 0
   let losses = 0
+  let ties = 0
   let pointsScored = 0
   let pointsConceded = 0
   let lastActive: string | null = null
   let bestTournamentRank: number | null = null
   let worstTournamentRank: number | null = null
 
-  const allResults: ('W' | 'L')[] = []
+  const allResults: ('W' | 'L' | 'T')[] = []
   let currentWinStreak = 0
   let bestWinStreak = 0
   let streak = 0
@@ -165,6 +176,7 @@ export function getPlayerDetailStats(group: PlayerGroup, playerId: string): Play
 
     for (const match of t.matches) {
       if (!playerInMatch(playerId, match)) continue
+      if (isPlayerFillIn(playerId, match)) continue
       totalMatches++
 
       const isTeam1 = match.team1.playerIds.includes(playerId)
@@ -183,6 +195,10 @@ export function getPlayerDetailStats(group: PlayerGroup, playerId: string): Play
         losses++
         streak = 0
         allResults.push('L')
+      } else if (won === null) {
+        ties++
+        streak = 0
+        allResults.push('T')
       }
     }
   }
@@ -201,6 +217,7 @@ export function getPlayerDetailStats(group: PlayerGroup, playerId: string): Play
     totalMatches,
     wins,
     losses,
+    ties,
     winRate: totalMatches > 0 ? wins / totalMatches : 0,
     lastActive,
     archived: player.archived,
@@ -226,6 +243,7 @@ export function getPlayerPartnerStats(group: PlayerGroup, playerId: string): Par
   for (const t of tournaments) {
     for (const match of t.matches) {
       if (!playerInMatch(playerId, match)) continue
+      if (isPlayerFillIn(playerId, match)) continue
       const isTeam1 = match.team1.playerIds.includes(playerId)
       const team = isTeam1 ? match.team1.playerIds : match.team2.playerIds
       const partnerId = team.find(id => id !== playerId)
@@ -260,6 +278,7 @@ export function getPlayerOpponentStats(group: PlayerGroup, playerId: string): Op
   for (const t of tournaments) {
     for (const match of t.matches) {
       if (!playerInMatch(playerId, match)) continue
+      if (isPlayerFillIn(playerId, match)) continue
       const isTeam1 = match.team1.playerIds.includes(playerId)
       const opponents = isTeam1 ? match.team2.playerIds : match.team1.playerIds
 
@@ -297,6 +316,7 @@ export function getPlayerTournamentHistory(group: PlayerGroup, playerId: string)
         totalPlayers: t.playerIds.length,
         wins: snapshot?.wins ?? 0,
         losses: snapshot?.losses ?? 0,
+        ties: snapshot?.ties ?? 0,
         points: snapshot?.points ?? 0,
         excluded: t.excluded,
       }
@@ -327,6 +347,7 @@ export function reconstructLeaderboard(record: TournamentRecord, group: PlayerGr
       points: 0,
       wins: 0,
       losses: 0,
+      ties: 0,
       gamesPlayed: 0,
       gamesPaused: 0,
       pointDifferential: 0,
@@ -371,6 +392,13 @@ export function reconstructLeaderboard(record: TournamentRecord, group: PlayerGr
 
       for (const pid of allIds) {
         const stats = statsMap.get(pid)!
+
+        // Skip fill-in players in equalizer rounds
+        if (match.fillInPlayerIds?.includes(pid)) {
+          stats.roundResults.push({ roundNumber: roundNum, paused: false, fillIn: true })
+          continue
+        }
+
         stats.gamesPlayed++
 
         const isTeam1 = match.team1.playerIds.includes(pid)
@@ -402,6 +430,9 @@ export function reconstructLeaderboard(record: TournamentRecord, group: PlayerGr
           } else if (myScore < theirScore) {
             stats.losses++
             roundResult.won = false
+          } else {
+            stats.ties++
+            roundResult.tied = true
           }
         } else {
           // Win/loss mode

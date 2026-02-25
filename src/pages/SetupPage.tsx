@@ -10,7 +10,7 @@ import {
   DEFAULT_TOURNAMENT_NAME, PLAYERS_PER_COURT,
   MONTE_CARLO_DEFAULT_ITERATIONS,
 } from '../constants'
-import { validatePlayerNames, suggestRoundCount, effectiveCourts } from '../utils/validation'
+import { validatePlayerNames, suggestRoundCount, effectiveCourts, predictEqualizerRounds } from '../utils/validation'
 import { generateScheduleMonteCarlo, computeFairnessMetrics, totalScheduleCost } from '../algorithm'
 import { buildMatrices } from '../algorithm/metrics'
 import { generateId } from '../utils/ids'
@@ -550,6 +550,14 @@ export function SetupPage() {
                 </div>
               </div>
             )}
+            {validNames.length > eCourts * PLAYERS_PER_COURT && (() => {
+              const eqCount = predictEqualizerRounds(validNames.length, eCourts, rounds)
+              return eqCount > 0 ? (
+                <p className="mt-1 text-sm text-text-muted">
+                  {t('setup.equalizerHint', { count: eqCount })}
+                </p>
+              ) : null
+            })()}
           </>
         )}
         {openEnded && (

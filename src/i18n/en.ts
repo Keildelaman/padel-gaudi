@@ -117,6 +117,7 @@ export const en: TranslationMap = {
   'table.points': 'Points',
   'table.wins': 'W',
   'table.losses': 'L',
+  'table.ties': 'T',
   'table.played': 'Played',
   'table.paused': 'Paused',
   'table.diff': '+/-',
@@ -202,6 +203,7 @@ export const en: TranslationMap = {
   'export.points': 'Points',
   'export.wins': 'Wins',
   'export.losses': 'Losses',
+  'export.ties': 'Ties',
   'export.played': 'Played',
   'export.paused': 'Paused',
   'export.pointDiff': 'Point Diff',
@@ -210,6 +212,7 @@ export const en: TranslationMap = {
   'export.textPts': 'Pts',
   'export.textWins': 'W',
   'export.textLosses': 'L',
+  'export.textTies': 'T',
 
   // Player Groups
   'nav.players': 'Players',
@@ -253,7 +256,7 @@ export const en: TranslationMap = {
   'players.backToList': 'Back to Players',
   'players.memberSince': 'Member since {date}',
   'players.performance': 'Performance',
-  'players.record': '{wins}W - {losses}L ({rate}%)',
+  'players.record': '{wins}W - {losses}L - {ties}T ({rate}%)',
   'players.pointsScored': 'Points scored',
   'players.pointsConceded': 'Points conceded',
   'players.pointDiff': 'Point differential',
@@ -285,6 +288,25 @@ export const en: TranslationMap = {
   'tournamentResult.back': '\u2190 Back to {name}',
   'tournamentResult.backToPlayers': '\u2190 Back to Players',
   'tournamentResult.notFound': 'Tournament not found.',
+
+  // Equalizer round
+  'equalizer.promptTitle': 'Equalizer Round?',
+  'equalizer.promptMessage': '{count} player(s) played fewer games than others.',
+  'equalizer.roundsNeeded': '{count} equalizer round(s) needed for everyone to catch up.',
+  'equalizer.behindPlayers': 'Behind players:',
+  'equalizer.skip': 'Skip & Finish',
+  'equalizer.add': 'Add Equalizer Round',
+  'equalizer.roundLabel': 'Equalizer Round',
+  'equalizer.progress': 'Equalizer Round {current} of {total}',
+  'equalizer.fillIns': 'Fill-ins (scores don\'t count):',
+  'equalizer.fillInBadge': 'Fill-in',
+  'equalizer.nextEqualizer': 'Next Equalizer',
+  'setup.equalizerHint': '~{count} equalizer round(s) needed to equalize games',
+  'roundControls.playEqualizer': 'Play {count} Equalizer Round(s)',
+  'round.equalizerHint': '~{count} equalizer round(s) will be needed',
+  'equalizer.explainerTitle': 'Equalizer Rounds',
+  'equalizer.explainerBody': 'Some players sat out more than others and played fewer games. {count} equalizer round(s) will be played so everyone ends up with the same number of games.\n\nFill-in players may join to complete courts — their scores won\'t count.\n\nAfter the equalizer rounds, the tournament will be finished.',
+  'equalizer.explainerConfirm': 'Start Equalizer Rounds',
 
   // Validation
   'validation.minPlayers': 'At least {min} players required',

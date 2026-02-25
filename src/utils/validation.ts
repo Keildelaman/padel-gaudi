@@ -39,3 +39,12 @@ export function suggestRoundCount(playerCount: number, courts: number): number {
 export function effectiveCourts(playerCount: number, requestedCourts: number): number {
   return Math.min(requestedCourts, Math.floor(playerCount / PLAYERS_PER_COURT))
 }
+
+export function predictEqualizerRounds(playerCount: number, courts: number, rounds: number): number {
+  const eCourts = effectiveCourts(playerCount, courts)
+  const slotsPerRound = eCourts * PLAYERS_PER_COURT
+  if (playerCount <= slotsPerRound) return 0
+  if ((rounds * slotsPerRound) % playerCount === 0) return 0
+  const behindCount = playerCount - ((rounds * slotsPerRound) % playerCount)
+  return Math.ceil(behindCount / slotsPerRound)
+}

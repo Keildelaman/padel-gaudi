@@ -147,6 +147,7 @@ export function PlayerDetailPage() {
               {t('players.record', {
                 wins: detailStats.wins,
                 losses: detailStats.losses,
+                ties: detailStats.ties,
                 rate: detailStats.totalMatches > 0 ? Math.round(detailStats.winRate * 100) : 0,
               })}
             </span>
@@ -192,7 +193,7 @@ export function PlayerDetailPage() {
                 <span
                   key={i}
                   className={`w-6 h-6 rounded-full text-xs font-bold flex items-center justify-center ${
-                    r === 'W' ? 'bg-emerald-900/60 text-emerald-400' : 'bg-red-900/60 text-red-400'
+                    r === 'W' ? 'bg-emerald-900/60 text-emerald-400' : r === 'L' ? 'bg-red-900/60 text-red-400' : 'bg-amber-900/60 text-amber-400'
                   }`}
                 >
                   {r}
@@ -283,7 +284,7 @@ export function PlayerDetailPage() {
                   <div className="text-xs text-text-muted flex gap-3 mt-0.5">
                     <span>{formatDate(th.date)}</span>
                     <span>{t('players.rank', { rank: th.rank, total: th.totalPlayers })}</span>
-                    <span>{th.wins}W-{th.losses}L</span>
+                    <span>{th.wins}W-{th.losses}L{th.ties > 0 ? `-${th.ties}T` : ''}</span>
                     <span>{th.points}pts</span>
                   </div>
                 </div>

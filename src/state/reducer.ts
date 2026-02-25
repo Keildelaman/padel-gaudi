@@ -126,6 +126,21 @@ export function tournamentReducer(state: TournamentState, action: TournamentActi
       }
     }
 
+    case 'ADD_EQUALIZER_ROUND': {
+      if (!state.tournament) return state
+      const { round } = action.payload
+      return {
+        ...state,
+        tournament: {
+          ...state.tournament,
+          rounds: [...state.tournament.rounds, round],
+          totalRounds: state.tournament.totalRounds + 1,
+          currentRound: round.roundNumber,
+        },
+        viewingRound: round.roundNumber,
+      }
+    }
+
     case 'CLEAR_MATCH_SCORES': {
       if (!state.tournament) return state
       const { roundNumber, courtIndex } = action.payload

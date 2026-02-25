@@ -13,16 +13,21 @@ interface CourtCardProps {
   onSetWinner: (winner: 1 | 2) => void
   onClearScore: () => void
   disabled?: boolean
+  fillInPlayerIds?: Set<string>
 }
 
 export function CourtCard({
   match, scoringConfig, playerNames, courtLabel,
-  onSetScore, onSetWinner, onClearScore, disabled,
+  onSetScore, onSetWinner, onClearScore, disabled, fillInPlayerIds,
 }: CourtCardProps) {
   const team1Name1 = playerNames[match.team1[0]] ?? '?'
   const team1Name2 = playerNames[match.team1[1]] ?? '?'
   const team2Name1 = playerNames[match.team2[0]] ?? '?'
   const team2Name2 = playerNames[match.team2[1]] ?? '?'
+  const ghost1_1 = fillInPlayerIds?.has(match.team1[0]) ?? false
+  const ghost1_2 = fillInPlayerIds?.has(match.team1[1]) ?? false
+  const ghost2_1 = fillInPlayerIds?.has(match.team2[0]) ?? false
+  const ghost2_2 = fillInPlayerIds?.has(match.team2[1]) ?? false
 
   if (scoringConfig.mode === 'winloss') {
     return (
@@ -31,6 +36,8 @@ export function CourtCard({
         team1Name2={team1Name2}
         team2Name1={team2Name1}
         team2Name2={team2Name2}
+        ghost1_1={ghost1_1} ghost1_2={ghost1_2}
+        ghost2_1={ghost2_1} ghost2_2={ghost2_2}
         courtLabel={courtLabel}
         winner={match.winner}
         onSetWinner={onSetWinner}
@@ -50,6 +57,8 @@ export function CourtCard({
         team1Name2={team1Name2}
         team2Name1={team2Name1}
         team2Name2={team2Name2}
+        ghost1_1={ghost1_1} ghost1_2={ghost1_2}
+        ghost2_1={ghost2_1} ghost2_2={ghost2_2}
         courtLabel={courtLabel}
         score1={match.score1}
         score2={match.score2}
@@ -68,6 +77,8 @@ export function CourtCard({
       team1Name2={team1Name2}
       team2Name1={team2Name1}
       team2Name2={team2Name2}
+      ghost1_1={ghost1_1} ghost1_2={ghost1_2}
+      ghost2_1={ghost2_1} ghost2_2={ghost2_2}
       courtLabel={courtLabel}
       score1={match.score1}
       score2={match.score2}
@@ -126,10 +137,13 @@ function CourtBackground({ courtLabel }: { courtLabel: string }) {
 
 function WinLossCourtLayout({
   team1Name1, team1Name2, team2Name1, team2Name2,
+  ghost1_1, ghost1_2, ghost2_1, ghost2_2,
   courtLabel, winner, onSetWinner, onClearScore, disabled,
 }: {
   team1Name1: string; team1Name2: string
   team2Name1: string; team2Name2: string
+  ghost1_1?: boolean; ghost1_2?: boolean
+  ghost2_1?: boolean; ghost2_2?: boolean
   courtLabel: string
   winner?: 1 | 2
   onSetWinner: (winner: 1 | 2) => void
@@ -164,9 +178,9 @@ function WinLossCourtLayout({
               : 'hover:bg-white/10'
           } disabled:cursor-not-allowed`}
         >
-          <PlayerPill name={team1Name1} color="blue" />
+          <PlayerPill name={team1Name1} color="blue" ghost={ghost1_1} />
           {winner === 1 && <span className="text-[11px] font-bold text-white bg-team-blue/80 px-2 py-0.5 rounded-full">{t('court.win')}</span>}
-          <PlayerPill name={team1Name2} color="blue" />
+          <PlayerPill name={team1Name2} color="blue" ghost={ghost1_2} />
         </button>
 
         {/* Team 2 (red) */}
@@ -180,9 +194,9 @@ function WinLossCourtLayout({
               : 'hover:bg-white/10'
           } disabled:cursor-not-allowed`}
         >
-          <PlayerPill name={team2Name1} color="red" />
+          <PlayerPill name={team2Name1} color="red" ghost={ghost2_1} />
           {winner === 2 && <span className="text-[11px] font-bold text-white bg-team-red/80 px-2 py-0.5 rounded-full">{t('court.win')}</span>}
-          <PlayerPill name={team2Name2} color="red" />
+          <PlayerPill name={team2Name2} color="red" ghost={ghost2_2} />
         </button>
       </div>
     </div>
@@ -193,11 +207,14 @@ function WinLossCourtLayout({
 
 function PointsCourtLayout({
   team1Name1, team1Name2, team2Name1, team2Name2,
+  ghost1_1, ghost1_2, ghost2_1, ghost2_2,
   courtLabel, score1, score2, max,
   onSetScore, onClearScore, disabled,
 }: {
   team1Name1: string; team1Name2: string
   team2Name1: string; team2Name2: string
+  ghost1_1?: boolean; ghost1_2?: boolean
+  ghost2_1?: boolean; ghost2_2?: boolean
   courtLabel: string
   score1?: number; score2?: number
   max: number
@@ -250,8 +267,8 @@ function PointsCourtLayout({
         {/* Team 1 (left): names spread vertically, score centered near net */}
         <div className="flex-1 flex items-center justify-center gap-2">
           <div className="flex flex-col items-center justify-around h-full">
-            <PlayerPill name={team1Name1} color="blue" />
-            <PlayerPill name={team1Name2} color="blue" />
+            <PlayerPill name={team1Name1} color="blue" ghost={ghost1_1} />
+            <PlayerPill name={team1Name2} color="blue" ghost={ghost1_2} />
           </div>
           <ScoreInput
             value={text1}
@@ -276,8 +293,8 @@ function PointsCourtLayout({
             onClear={onClearScore}
           />
           <div className="flex flex-col items-center justify-around h-full">
-            <PlayerPill name={team2Name1} color="red" />
-            <PlayerPill name={team2Name2} color="red" />
+            <PlayerPill name={team2Name1} color="red" ghost={ghost2_1} />
+            <PlayerPill name={team2Name2} color="red" ghost={ghost2_2} />
           </div>
         </div>
       </div>
@@ -289,11 +306,14 @@ function PointsCourtLayout({
 
 function IndependentScoreCourtLayout({
   team1Name1, team1Name2, team2Name1, team2Name2,
+  ghost1_1, ghost1_2, ghost2_1, ghost2_2,
   courtLabel, score1, score2, pickerMax, targetScore,
   onSetScore, onClearScore, disabled,
 }: {
   team1Name1: string; team1Name2: string
   team2Name1: string; team2Name2: string
+  ghost1_1?: boolean; ghost1_2?: boolean
+  ghost2_1?: boolean; ghost2_2?: boolean
   courtLabel: string
   score1?: number; score2?: number
   pickerMax: number
@@ -355,8 +375,8 @@ function IndependentScoreCourtLayout({
       <div className="absolute inset-0 flex">
         <div className="flex-1 flex items-center justify-center gap-2">
           <div className="flex flex-col items-center justify-around h-full">
-            <PlayerPill name={team1Name1} color="blue" />
-            <PlayerPill name={team1Name2} color="blue" />
+            <PlayerPill name={team1Name1} color="blue" ghost={ghost1_1} />
+            <PlayerPill name={team1Name2} color="blue" ghost={ghost1_2} />
           </div>
           <ScoreInput
             value={text1}
@@ -388,8 +408,8 @@ function IndependentScoreCourtLayout({
             onClear={onClearScore}
           />
           <div className="flex flex-col items-center justify-around h-full">
-            <PlayerPill name={team2Name1} color="red" />
-            <PlayerPill name={team2Name2} color="red" />
+            <PlayerPill name={team2Name1} color="red" ghost={ghost2_1} />
+            <PlayerPill name={team2Name2} color="red" ghost={ghost2_2} />
           </div>
         </div>
       </div>
@@ -503,13 +523,13 @@ function ScoreInput({ value, max, color, disabled, onChange, onSelect, onClear }
 
 /* ─── Player Pill ─── */
 
-function PlayerPill({ name, color }: { name: string; color: 'blue' | 'red' }) {
+function PlayerPill({ name, color, ghost }: { name: string; color: 'blue' | 'red'; ghost?: boolean }) {
   const colors = color === 'blue'
-    ? 'border-team-blue text-team-blue'
-    : 'border-team-red text-team-red'
+    ? ghost ? 'border-team-blue/40 text-team-blue/50 border-dashed bg-white/70' : 'border-team-blue text-team-blue bg-white/95'
+    : ghost ? 'border-team-red/40 text-team-red/50 border-dashed bg-white/70' : 'border-team-red text-team-red bg-white/95'
 
   return (
-    <span className={`inline-block px-3 py-1 bg-white/95 rounded-full border-2 text-sm font-semibold shadow-md ${colors}`}>
+    <span className={`inline-block px-3 py-1 rounded-full border-2 text-sm font-semibold shadow-md ${colors}`}>
       {name}
     </span>
   )

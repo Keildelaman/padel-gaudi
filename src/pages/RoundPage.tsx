@@ -1,21 +1,26 @@
 import { useState, useMemo, useEffect, useRef } from 'react'
 import { useTournament, usePlayerGroup, isRoundComplete, getLeaderboard, buildTournamentRecord } from '../state'
-import { ProgressBar, Modal } from '../components/shared'
+import { ProgressBar, Modal, Badge } from '../components/shared'
 import { CourtCard } from '../components/round/CourtCard'
 import { PauseList } from '../components/round/PauseList'
 import { RoundControls } from '../components/round/RoundControls'
 import { RoundStats } from '../components/round/RoundStats'
 import { RoundTimer } from '../components/round/RoundTimer'
-import { generateAdditionalRoundsMonteCarlo } from '../algorithm'
+import { generateAdditionalRoundsMonteCarlo, detectGamesGap, generateEqualizerRound } from '../algorithm'
 import { OPEN_ENDED_EXTEND_THRESHOLD, OPEN_ENDED_BATCH_SIZE, MONTE_CARLO_DEFAULT_ITERATIONS, DEFAULT_MATCH_DURATION_MINUTES } from '../constants'
+import { predictEqualizerRounds } from '../utils/validation'
 import { useT } from '../i18n'
 import type { Round } from '../types'
+import type { GamesGapInfo } from '../algorithm'
 
 export function RoundPage() {
   const { state, dispatch } = useTournament()
   const { pgState, pgDispatch } = usePlayerGroup()
   const { t } = useT()
   const [showFinishModal, setShowFinishModal] = useState(false)
+  const [showEqualizerPrompt, setShowEqualizerPrompt] = useState(false)
+  const [gamesGapInfo, setGamesGapInfo] = useState<GamesGapInfo | null>(null)
+  const [showEqualizerExplainer, setShowEqualizerExplainer] = useState(false)
   const [excludeFromRegistry, setExcludeFromRegistry] = useState(false)
   const [extending, setExtending] = useState(false)
   const extendingRef = useRef(false)
@@ -93,6 +98,30 @@ export function RoundPage() {
   const isLastRound = !tournament.openEnded && state.viewingRound === tournament.totalRounds
   const completedRounds = tournament.rounds.filter(r => r.completed).length
 
+  // Equalizer round info
+  const isEqualizerRound = round.isEqualizerRound ?? false
+  const fillInIds = isEqualizerRound ? new Set(round.fillInPlayerIds ?? []) : undefined
+  const equalizerRounds = tournament.rounds.filter(r => r.isEqualizerRound)
+  const equalizerIndex = isEqualizerRound ? equalizerRounds.indexOf(round) + 1 : 0
+
+  // Compute remaining gap (for "next equalizer" button and hint text)
+  const currentGap = useMemo(() => {
+    return detectGamesGap(tournament)
+  }, [tournament.rounds, tournament.currentRound])
+
+  // Predicted equalizer rounds: use live gap on last/equalizer rounds, prediction for earlier rounds
+  const predictedEqualizerCount = useMemo(() => {
+    if (isEqualizerRound || isLastRound || tournament.openEnded) {
+      return currentGap?.equalizerRoundsNeeded ?? 0
+    }
+    if (tournament.openEnded) return 0
+    return predictEqualizerRounds(tournament.players.length, tournament.courts, tournament.totalRounds)
+  }, [currentGap, isEqualizerRound, isLastRound, tournament.openEnded, tournament.players.length, tournament.courts, tournament.totalRounds])
+
+  const totalEqualizersNeeded = currentGap
+    ? equalizerRounds.length + currentGap.equalizerRoundsNeeded
+    : equalizerRounds.length
+
   const handleSetScore = (courtIndex: number, score1: number, score2: number) => {
     dispatch({
       type: 'SET_SCORE',
@@ -116,6 +145,59 @@ export function RoundPage() {
 
   const handleComplete = () => {
     dispatch({ type: 'COMPLETE_ROUND', payload: { roundNumber: state.viewingRound } })
+  }
+
+  const handleFinishClick = () => {
+    // Check for games gap before showing finish modal
+    const gap = detectGamesGap(tournament)
+    if (gap && !tournament.rounds.some(r => r.isEqualizerRound)) {
+      // First time: show equalizer prompt
+      setGamesGapInfo(gap)
+      setShowEqualizerPrompt(true)
+    } else if (gap && isEqualizerRound) {
+      // On an equalizer round but still a gap — show finish modal directly
+      // (user can also choose "Next Equalizer" from the controls)
+      setShowFinishModal(true)
+    } else {
+      setShowFinishModal(true)
+    }
+  }
+
+  const handleAddEqualizer = () => {
+    if (roundComplete && !round.completed) {
+      dispatch({ type: 'COMPLETE_ROUND', payload: { roundNumber: state.viewingRound } })
+    }
+    const equalizerRound = generateEqualizerRound(tournament)
+    dispatch({ type: 'ADD_EQUALIZER_ROUND', payload: { round: equalizerRound } })
+    setShowEqualizerPrompt(false)
+    setGamesGapInfo(null)
+  }
+
+  const handleNextEqualizer = () => {
+    if (roundComplete && !round.completed) {
+      dispatch({ type: 'COMPLETE_ROUND', payload: { roundNumber: state.viewingRound } })
+    }
+    const equalizerRound = generateEqualizerRound(tournament)
+    dispatch({ type: 'ADD_EQUALIZER_ROUND', payload: { round: equalizerRound } })
+  }
+
+  const handleSkipAndFinish = () => {
+    setShowEqualizerPrompt(false)
+    setGamesGapInfo(null)
+    setShowFinishModal(true)
+  }
+
+  const handleStartEqualizer = () => {
+    setShowEqualizerExplainer(true)
+  }
+
+  const handleConfirmStartEqualizer = () => {
+    if (roundComplete && !round.completed) {
+      dispatch({ type: 'COMPLETE_ROUND', payload: { roundNumber: state.viewingRound } })
+    }
+    const equalizerRound = generateEqualizerRound(tournament)
+    dispatch({ type: 'ADD_EQUALIZER_ROUND', payload: { round: equalizerRound } })
+    setShowEqualizerExplainer(false)
   }
 
   const handleFinish = () => {
@@ -155,6 +237,16 @@ export function RoundPage() {
         playerNames={round.pausedPlayerIds.map(id => playerNames[id] ?? '?')}
       />
 
+      {/* Fill-in players list for equalizer rounds */}
+      {isEqualizerRound && (round.fillInPlayerIds?.length ?? 0) > 0 && (
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-sm text-text-muted">{t('equalizer.fillIns')}</span>
+          {round.fillInPlayerIds!.map(id => (
+            <Badge key={id} color="gray">{playerNames[id] ?? '?'}</Badge>
+          ))}
+        </div>
+      )}
+
       {/* Courts grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {round.matches.map(match => (
@@ -168,9 +260,16 @@ export function RoundPage() {
             onSetWinner={(w) => handleSetWinner(match.courtIndex, w)}
             onClearScore={() => handleClearScore(match.courtIndex)}
             disabled={round.completed}
+            fillInPlayerIds={fillInIds}
           />
         ))}
       </div>
+
+      {!isEqualizerRound && predictedEqualizerCount > 0 && (
+        <p className="text-sm text-text-muted text-center">
+          {t('round.equalizerHint', { count: predictedEqualizerCount })}
+        </p>
+      )}
 
       <RoundControls
         roundNumber={state.viewingRound}
@@ -179,12 +278,21 @@ export function RoundPage() {
         isConfirmed={round.completed}
         isLastRound={isLastRound}
         openEnded={tournament.openEnded}
+        isEqualizerRound={isEqualizerRound}
+        equalizerProgress={isEqualizerRound && totalEqualizersNeeded > 1
+          ? { current: equalizerIndex, total: totalEqualizersNeeded }
+          : undefined
+        }
+        hasMoreEqualizers={isEqualizerRound && !!currentGap}
+        equalizerRoundsNeeded={predictedEqualizerCount}
         onPrev={() => dispatch({ type: 'NAVIGATE_ROUND', payload: { roundNumber: state.viewingRound - 1 } })}
         onNext={() => {
           if (roundComplete && !round.completed) handleComplete()
           dispatch({ type: 'NAVIGATE_ROUND', payload: { roundNumber: state.viewingRound + 1 } })
         }}
-        onFinish={() => setShowFinishModal(true)}
+        onFinish={handleFinishClick}
+        onNextEqualizer={handleNextEqualizer}
+        onStartEqualizer={handleStartEqualizer}
       />
 
       {extending && (
@@ -193,6 +301,43 @@ export function RoundPage() {
 
       <RoundStats tournament={tournament} />
 
+      {/* Equalizer Prompt Modal */}
+      <Modal
+        open={showEqualizerPrompt}
+        onClose={() => setShowEqualizerPrompt(false)}
+        title={t('equalizer.promptTitle')}
+        confirmText={t('equalizer.add')}
+        onConfirm={handleAddEqualizer}
+      >
+        <p className="mb-2">{t('equalizer.promptMessage', { count: gamesGapInfo?.behindPlayerIds.length ?? 0 })}</p>
+        <p className="text-sm text-text-muted mb-3">{t('equalizer.roundsNeeded', { count: gamesGapInfo?.equalizerRoundsNeeded ?? 0 })}</p>
+        <div className="flex items-center gap-2 flex-wrap mb-4">
+          <span className="text-sm text-text-muted">{t('equalizer.behindPlayers')}</span>
+          {gamesGapInfo?.behindPlayerIds.map(id => (
+            <Badge key={id} color="yellow">{playerNames[id] ?? '?'}</Badge>
+          ))}
+        </div>
+        <button
+          type="button"
+          onClick={handleSkipAndFinish}
+          className="text-sm text-text-muted hover:text-text underline"
+        >
+          {t('equalizer.skip')}
+        </button>
+      </Modal>
+
+      {/* Equalizer Explainer Modal */}
+      <Modal
+        open={showEqualizerExplainer}
+        onClose={() => setShowEqualizerExplainer(false)}
+        title={t('equalizer.explainerTitle')}
+        confirmText={t('equalizer.explainerConfirm')}
+        onConfirm={handleConfirmStartEqualizer}
+      >
+        <p>{t('equalizer.explainerBody', { count: predictedEqualizerCount })}</p>
+      </Modal>
+
+      {/* Finish Tournament Modal */}
       <Modal
         open={showFinishModal}
         onClose={() => setShowFinishModal(false)}

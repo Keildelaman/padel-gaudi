@@ -17,6 +17,7 @@ export type TournamentAction =
   | { type: 'CLEAR_MATCH_SCORES'; payload: { roundNumber: number; courtIndex: number } }
   | { type: 'VIEW_PLAYER_DETAIL'; payload: { playerId: string } }
   | { type: 'VIEW_TOURNAMENT_RESULT'; payload: { tournamentId: string } }
+  | { type: 'ADD_EQUALIZER_ROUND'; payload: { round: Round } }
 
 export interface TournamentState {
   tournament: import('../types').Tournament | null

@@ -9,6 +9,8 @@ import { PLAYERS_PER_COURT, OPTIMAL_ACTIVE_PLAYERS_THRESHOLD } from '../constant
 export { scoreArrangement } from './scoring'
 export { computeFairnessMetrics } from './metrics'
 export { createEmptyHistory, updateHistory } from './history'
+export { detectGamesGap, generateEqualizerRound } from './equalizerRound'
+export type { GamesGapInfo } from './equalizerRound'
 
 /** Mutable stats accumulator threaded through generation calls. */
 interface GenStats {

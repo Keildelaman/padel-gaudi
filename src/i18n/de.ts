@@ -117,6 +117,7 @@ export const de: TranslationMap = {
   'table.points': 'Punkte',
   'table.wins': 'S',
   'table.losses': 'N',
+  'table.ties': 'U',
   'table.played': 'Gespielt',
   'table.paused': 'Pausiert',
   'table.diff': '+/-',
@@ -202,6 +203,7 @@ export const de: TranslationMap = {
   'export.points': 'Punkte',
   'export.wins': 'Siege',
   'export.losses': 'Niederlagen',
+  'export.ties': 'Unentschieden',
   'export.played': 'Gespielt',
   'export.paused': 'Pausiert',
   'export.pointDiff': 'Pkt-Diff',
@@ -210,6 +212,7 @@ export const de: TranslationMap = {
   'export.textPts': 'Pkt',
   'export.textWins': 'S',
   'export.textLosses': 'N',
+  'export.textTies': 'U',
 
   // Player Groups
   'nav.players': 'Spieler',
@@ -253,7 +256,7 @@ export const de: TranslationMap = {
   'players.backToList': 'Zur\u00fcck zu Spieler',
   'players.memberSince': 'Mitglied seit {date}',
   'players.performance': 'Leistung',
-  'players.record': '{wins}S - {losses}N ({rate}%)',
+  'players.record': '{wins}S - {losses}N - {ties}U ({rate}%)',
   'players.pointsScored': 'Punkte erzielt',
   'players.pointsConceded': 'Punkte kassiert',
   'players.pointDiff': 'Punktedifferenz',
@@ -285,6 +288,25 @@ export const de: TranslationMap = {
   'tournamentResult.back': '\u2190 Zur\u00fcck zu {name}',
   'tournamentResult.backToPlayers': '\u2190 Zur\u00fcck zu Spieler',
   'tournamentResult.notFound': 'Turnier nicht gefunden.',
+
+  // Equalizer round
+  'equalizer.promptTitle': 'Ausgleichsrunde?',
+  'equalizer.promptMessage': '{count} Spieler haben weniger Spiele als andere.',
+  'equalizer.roundsNeeded': '{count} Ausgleichsrunde(n) n\u00f6tig, damit alle gleich viele Spiele haben.',
+  'equalizer.behindPlayers': 'Betroffene Spieler:',
+  'equalizer.skip': '\u00dcberspringen & Beenden',
+  'equalizer.add': 'Ausgleichsrunde hinzuf\u00fcgen',
+  'equalizer.roundLabel': 'Ausgleichsrunde',
+  'equalizer.progress': 'Ausgleichsrunde {current} von {total}',
+  'equalizer.fillIns': 'Aushilfen (z\u00e4hlt nicht):',
+  'equalizer.fillInBadge': 'Aushilfe',
+  'equalizer.nextEqualizer': 'N\u00e4chste Ausgleichsrunde',
+  'setup.equalizerHint': '~{count} Ausgleichsrunde(n) nötig um Spiele auszugleichen',
+  'roundControls.playEqualizer': '{count} Ausgleichsrunde(n) spielen',
+  'round.equalizerHint': '~{count} Ausgleichsrunde(n) werden benötigt',
+  'equalizer.explainerTitle': 'Ausgleichsrunden',
+  'equalizer.explainerBody': 'Einige Spieler haben öfter pausiert und weniger Spiele gespielt. {count} Ausgleichsrunde(n) werden gespielt, damit alle gleich viele Spiele haben.\n\nAushilfsspieler können dazukommen um Courts zu füllen — ihre Punkte zählen nicht.\n\nNach den Ausgleichsrunden wird das Turnier beendet.',
+  'equalizer.explainerConfirm': 'Ausgleichsrunden starten',
 
   // Validation
   'validation.minPlayers': 'Mindestens {min} Spieler erforderlich',

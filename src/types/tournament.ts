@@ -17,6 +17,8 @@ export interface Round {
   matches: MatchAssignment[]
   pausedPlayerIds: string[]
   completed: boolean
+  isEqualizerRound?: boolean
+  fillInPlayerIds?: string[]
 }
 
 export type ScoringMode = 'points' | 'winloss' | 'pointsToWin' | 'timed'

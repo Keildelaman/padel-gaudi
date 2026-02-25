@@ -12,6 +12,7 @@ export interface MatchRecord {
   team1: { playerIds: [string, string]; score: number }
   team2: { playerIds: [string, string]; score: number }
   winner?: 1 | 2
+  fillInPlayerIds?: string[]
 }
 
 export interface TournamentRecord {
@@ -36,6 +37,7 @@ export interface TournamentRecord {
     points: number
     wins: number
     losses: number
+    ties?: number
     gamesPlayed: number
     pointDifferential: number
   }>

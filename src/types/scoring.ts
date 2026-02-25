@@ -4,6 +4,7 @@ export interface PlayerStats {
   points: number
   wins: number
   losses: number
+  ties: number
   gamesPlayed: number
   gamesPaused: number
   pointDifferential: number
@@ -20,6 +21,8 @@ export interface RoundResult {
   pointsScored?: number
   pointsConceded?: number
   won?: boolean
+  tied?: boolean
+  fillIn?: boolean
 }
 
 export interface LeaderboardEntry extends PlayerStats {

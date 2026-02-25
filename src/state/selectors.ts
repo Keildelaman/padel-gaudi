@@ -1,7 +1,11 @@
-import type { Tournament, ScoringMode, PlayerStats, LeaderboardEntry, RoundResult } from '../types'
+import type { Tournament, ScoringMode, PlayerStats, LeaderboardEntry, RoundResult, Round } from '../types'
 
 function usesPointScoring(mode: ScoringMode): boolean {
   return mode === 'points' || mode === 'pointsToWin' || mode === 'timed'
+}
+
+function getPlayedRounds(tournament: Tournament): Round[] {
+  return tournament.rounds.filter(r => r.completed || r.roundNumber === tournament.currentRound)
 }
 
 export function getPlayerStats(tournament: Tournament): PlayerStats[] {
@@ -14,6 +18,7 @@ export function getPlayerStats(tournament: Tournament): PlayerStats[] {
       points: 0,
       wins: 0,
       losses: 0,
+      ties: 0,
       gamesPlayed: 0,
       gamesPaused: 0,
       pointDifferential: 0,
@@ -21,7 +26,9 @@ export function getPlayerStats(tournament: Tournament): PlayerStats[] {
     })
   }
 
-  for (const round of tournament.rounds) {
+  for (const round of getPlayedRounds(tournament)) {
+    const fillIns = round.isEqualizerRound ? new Set(round.fillInPlayerIds ?? []) : null
+
     // Mark paused players
     for (const pid of round.pausedPlayerIds) {
       const stats = statsMap.get(pid)!
@@ -34,6 +41,12 @@ export function getPlayerStats(tournament: Tournament): PlayerStats[] {
 
       for (const pid of allIds) {
         const stats = statsMap.get(pid)!
+
+        // Fill-in players in equalizer rounds: record the round but skip stats
+        if (fillIns?.has(pid)) {
+          stats.roundResults.push({ roundNumber: round.roundNumber, paused: false, fillIn: true })
+          continue
+        }
         stats.gamesPlayed++
 
         const isTeam1 = match.team1.includes(pid)
@@ -65,6 +78,9 @@ export function getPlayerStats(tournament: Tournament): PlayerStats[] {
             } else if (myScore < theirScore) {
               stats.losses++
               roundResult.won = false
+            } else {
+              stats.ties++
+              roundResult.tied = true
             }
           }
         } else {
@@ -125,12 +141,20 @@ export function getPartnerMatrix(tournament: Tournament): { matrix: number[][]; 
   const idIdx = new Map(playerIds.map((id, i) => [id, i]))
   const matrix = Array.from({ length: n }, () => new Array(n).fill(0))
 
-  for (const round of tournament.rounds) {
+  for (const round of getPlayedRounds(tournament)) {
+    const fillIns = round.isEqualizerRound ? new Set(round.fillInPlayerIds ?? []) : null
     for (const match of round.matches) {
-      const [a, b] = match.team1.map(id => idIdx.get(id)!)
-      const [c, d] = match.team2.map(id => idIdx.get(id)!)
-      matrix[a][b]++; matrix[b][a]++
-      matrix[c][d]++; matrix[d][c]++
+      // Skip fill-in player pairings in equalizer rounds
+      const t1 = match.team1.filter(id => !fillIns?.has(id))
+      const t2 = match.team2.filter(id => !fillIns?.has(id))
+      if (t1.length === 2) {
+        const [a, b] = t1.map(id => idIdx.get(id)!)
+        matrix[a][b]++; matrix[b][a]++
+      }
+      if (t2.length === 2) {
+        const [c, d] = t2.map(id => idIdx.get(id)!)
+        matrix[c][d]++; matrix[d][c]++
+      }
     }
   }
   return { matrix, playerIds }
@@ -142,10 +166,13 @@ export function getOpponentMatrix(tournament: Tournament): { matrix: number[][];
   const idIdx = new Map(playerIds.map((id, i) => [id, i]))
   const matrix = Array.from({ length: n }, () => new Array(n).fill(0))
 
-  for (const round of tournament.rounds) {
+  for (const round of getPlayedRounds(tournament)) {
+    const fillIns = round.isEqualizerRound ? new Set(round.fillInPlayerIds ?? []) : null
     for (const match of round.matches) {
       for (const a of match.team1) {
+        if (fillIns?.has(a)) continue
         for (const b of match.team2) {
+          if (fillIns?.has(b)) continue
           const ai = idIdx.get(a)!
           const bi = idIdx.get(b)!
           matrix[ai][bi]++; matrix[bi][ai]++

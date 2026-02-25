@@ -12,6 +12,8 @@ export function LeaderboardTable({ entries, playerNames }: LeaderboardTableProps
   const { t } = useT()
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const playerMap = playerNames
+  const hasTies = entries.some(e => e.ties > 0)
+  const colSpan = hasTies ? 9 : 8
 
   const rankBadge = (rank: number) => {
     if (rank === 1) return <Badge color="gold">{t('table.1st')}</Badge>
@@ -30,6 +32,7 @@ export function LeaderboardTable({ entries, playerNames }: LeaderboardTableProps
             <th className="text-right py-3 px-2">{t('table.points')}</th>
             <th className="text-right py-3 px-2">{t('table.wins')}</th>
             <th className="text-right py-3 px-2">{t('table.losses')}</th>
+            {hasTies && <th className="text-right py-3 px-2">{t('table.ties')}</th>}
             <th className="text-right py-3 px-2 hidden sm:table-cell">{t('table.played')}</th>
             <th className="text-right py-3 px-2 hidden sm:table-cell">{t('table.paused')}</th>
             <th className="text-right py-3 px-2 hidden md:table-cell">{t('table.diff')}</th>
@@ -50,6 +53,7 @@ export function LeaderboardTable({ entries, playerNames }: LeaderboardTableProps
                 <td className="py-3 px-2 text-right tabular-nums font-semibold">{entry.points}</td>
                 <td className="py-3 px-2 text-right tabular-nums text-emerald-400">{entry.wins}</td>
                 <td className="py-3 px-2 text-right tabular-nums text-rose-400">{entry.losses}</td>
+                {hasTies && <td className="py-3 px-2 text-right tabular-nums text-amber-400">{entry.ties}</td>}
                 <td className="py-3 px-2 text-right tabular-nums hidden sm:table-cell">{entry.gamesPlayed}</td>
                 <td className="py-3 px-2 text-right tabular-nums hidden sm:table-cell">{entry.gamesPaused}</td>
                 <td className="py-3 px-2 text-right tabular-nums hidden md:table-cell">
@@ -60,21 +64,23 @@ export function LeaderboardTable({ entries, playerNames }: LeaderboardTableProps
               </tr>
               {expandedId === entry.playerId && (
                 <tr key={`${entry.playerId}-detail`}>
-                  <td colSpan={8} className="px-4 py-3 bg-surface-alt">
+                  <td colSpan={colSpan} className="px-4 py-3 bg-surface-alt">
                     <div className="text-xs space-y-1">
                       {entry.roundResults.map(rr => (
                         <div key={rr.roundNumber} className="flex items-center gap-2">
                           <span className="text-text-muted w-12">R{rr.roundNumber}:</span>
                           {rr.paused ? (
                             <Badge color="yellow">{t('table.paused_badge')}</Badge>
+                          ) : rr.fillIn ? (
+                            <Badge color="gray">{t('equalizer.fillInBadge')}</Badge>
                           ) : (
                             <>
                               <span>{t('table.with')} {playerMap.get(rr.partnerId!) ?? '?'}</span>
                               <span className="text-text-muted">{t('table.vs')}</span>
                               <span>{rr.opponentIds?.map(id => playerMap.get(id) ?? '?').join(' & ')}</span>
-                              {rr.won != null && (
-                                <Badge color={rr.won ? 'green' : 'red'}>{rr.won ? t('table.wins') : t('table.losses')}</Badge>
-                              )}
+                              {rr.won === true && <Badge color="green">{t('table.wins')}</Badge>}
+                              {rr.won === false && <Badge color="red">{t('table.losses')}</Badge>}
+                              {rr.tied && <Badge color="yellow">{t('table.ties')}</Badge>}
                               {rr.pointsScored != null && (
                                 <span className="text-text-muted tabular-nums">{rr.pointsScored}-{rr.pointsConceded}</span>
                               )}
