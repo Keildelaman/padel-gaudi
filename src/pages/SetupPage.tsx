@@ -53,7 +53,6 @@ export function SetupPage() {
     ensureTrailingEmpty(draftHasNames ? draft!.playerNames : defaultPlayerNames)
   )
   const [linkedPlayerIds, setLinkedPlayerIds] = useState<(string | null)[]>(draft?.linkedPlayerIds ?? [])
-  const [showArchivedInAutocomplete, setShowArchivedInAutocomplete] = useState(false)
   const [courts, setCourts] = useState(draft?.courts ?? 1)
   const [rounds, setRounds] = useState(draft?.rounds ?? 6)
   const [openEnded, setOpenEnded] = useState(draft?.openEnded ?? false)
@@ -70,9 +69,8 @@ export function SetupPage() {
 
   const registeredPlayers = useMemo(() => {
     if (!activeGroup) return []
-    if (showArchivedInAutocomplete) return activeGroup.players
     return getNonArchivedPlayers(activeGroup)
-  }, [activeGroup, showArchivedInAutocomplete])
+  }, [activeGroup])
 
   const selectedPlayerIds = useMemo(() => {
     const ids = new Set<string>()
@@ -402,17 +400,6 @@ export function SetupPage() {
           <label className="text-lg font-bold text-text">
             {t('setup.players', { count: validNames.length })}
           </label>
-          {registeredPlayers.length > 0 && (
-            <label className="flex items-center gap-1.5 text-xs text-text-muted cursor-pointer">
-              <input
-                type="checkbox"
-                checked={showArchivedInAutocomplete}
-                onChange={e => setShowArchivedInAutocomplete(e.target.checked)}
-                className="accent-primary"
-              />
-              {t('setup.showArchived')}
-            </label>
-          )}
         </div>
         <div className="space-y-2">
           {playerNames.map((pName, i) => {
