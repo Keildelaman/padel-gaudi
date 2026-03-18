@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react'
-import type { ScoutTournament, ScoutTeam, ScoutPlayer, ScoutLoadingState, PlayerProfile, UpcomingTournament } from './types'
+import type { ScoutTournament, ScoutTeam, ScoutPlayer, ScoutLoadingState, PlayerProfile } from './types'
 import { fetchTournamentHtml, fetchPlayerHtml } from './api'
 import { parseTournamentPage, parsePlayerPage, parseUpcomingTournaments, extractTournamentUuid, nameToSlug } from './parser'
 
